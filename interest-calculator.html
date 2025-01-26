@@ -7,26 +7,46 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        h1 {
+            margin-top: 20px;
+            font-size: 1.8rem;
+            text-align: center;
+            color: #007BFF;
         }
         form {
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 15px;
+            width: 90%;
             max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         label {
             font-weight: bold;
             margin-bottom: 5px;
         }
         input {
-            padding: 8px;
+            padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            width: 100%;
         }
         button {
-            padding: 10px 15px;
+            padding: 12px;
             font-size: 16px;
             color: white;
             background-color: #007BFF;
@@ -37,24 +57,43 @@
         button:hover {
             background-color: #0056b3;
         }
+        .table-container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow-y: auto;
+            max-height: 400px; /* Set the max height for scrollable content */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            background: white;
         }
         th, td {
+            padding: 10px;
             border: 1px solid #ddd;
-            padding: 8px;
             text-align: center;
+            font-size: 14px;
         }
         th {
             background-color: #f4f4f4;
+            font-weight: bold;
             position: sticky;
-            top: 0;
-            z-index: 1;
+            top: 0; /* Stick the header to the top */
+            z-index: 1; /* Ensure it stays above the table rows */
         }
-        th, td {
-            text-align: center;
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            form, .table-container {
+                width: 95%;
+            }
+            th, td {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -85,22 +124,24 @@
         <button type="button" onclick="generateTable()">Generate Table</button>
     </form>
 
-    <table id="resultTable">
-        <thead>
-            <tr>
-                <th>Month</th>
-                <th>Balance</th>
-                <th>Interest</th>
-                <th>Cut Balance</th>
-                <th>Interest After Cut</th>
-                <th>Tax</th>
-                <th>Ending Balance</th>
-                <th>End Balance After Taxes</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table id="resultTable">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Balance</th>
+                    <th>Interest</th>
+                    <th>Cut Balance</th>
+                    <th>Interest After Cut</th>
+                    <th>Tax</th>
+                    <th>Ending Balance</th>
+                    <th>End Balance After Taxes</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
 
     <script>
         function formatNumber(num) {
