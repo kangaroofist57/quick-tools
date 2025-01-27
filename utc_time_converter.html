@@ -44,8 +44,6 @@
         <div id="result" class="result"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
     <script>
         function convertTime() {
             const utcInput = document.getElementById('utcInput').value;
@@ -56,23 +54,25 @@
                 // Remove UTC from the end if present and trim
                 let cleanUtcString = utcInput.replace(' UTC', '').trim();
                 
-                // Parse the UTC date
-                const utcMoment = moment.utc(cleanUtcString);
+                // Create Date object (it will be in UTC)
+                const utcDate = new Date(cleanUtcString);
 
                 // Check if the date is valid
-                if (!utcMoment.isValid()) {
+                if (isNaN(utcDate.getTime())) {
                     throw new Error('Invalid date format');
                 }
 
                 // Convert to target timezone
-                const convertedMoment = utcMoment.tz(targetTimezone);
-
-                if (!convertedMoment.isValid()) {
-                    throw new Error('Invalid timezone');
-                }
-
-                // Format the converted date
-                const convertedDate = convertedMoment.format('YYYY-MM-DD HH:mm:ss.SSS');
+                const convertedDate = utcDate.toLocaleString("en-US", {
+                    timeZone: targetTimezone,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
 
                 // Show result
                 resultDiv.style.display = 'block';
