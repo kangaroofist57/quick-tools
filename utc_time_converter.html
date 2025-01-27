@@ -54,8 +54,8 @@
                 // Remove UTC from the end if present and trim
                 let cleanUtcString = utcInput.replace(' UTC', '').trim();
                 
-                // Create Date object (it will be in UTC)
-                const utcDate = new Date(cleanUtcString);
+                // Create Date object ensuring it's treated as UTC
+                const utcDate = new Date(cleanUtcString + 'Z');
 
                 // Check if the date is valid
                 if (isNaN(utcDate.getTime())) {
