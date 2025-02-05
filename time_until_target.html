@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Until Target</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2, h3 {
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        p {
+            font-size: 18px;
+            color: #333;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Time Until Target</h2>
+        
+        <h3>8-Hour Target</h3>
+        <label for="current1">Current Hours:</label>
+        <input type="number" id="current1" step="0.01" placeholder="Enter current hours">
+        <label for="target1">Target Hours:</label>
+        <input type="number" id="target1" step="0.01" value="8">
+        <button onclick="calculateTimeLeft('current1', 'target1', 'result1')">Calculate</button>
+        <p id="result1"></p>
+        
+        <h3>40-Hour Target</h3>
+        <label for="current2">Current Hours:</label>
+        <input type="number" id="current2" step="0.01" placeholder="Enter current hours">
+        <label for="target2">Target Hours:</label>
+        <input type="number" id="target2" step="0.01" value="40">
+        <button onclick="calculateTimeLeft('current2', 'target2', 'result2')">Calculate</button>
+        <p id="result2"></p>
+    </div>
+
+    <script>
+        function calculateTimeLeft(currentId, targetId, resultId) {
+            let current = parseFloat(document.getElementById(currentId).value);
+            let target = parseFloat(document.getElementById(targetId).value);
+            
+            if (isNaN(current) || isNaN(target) || current >= target) {
+                document.getElementById(resultId).innerText = "Invalid input or target already reached.";
+                return;
+            }
+            
+            let timeLeft = (target - current) * 60; // Convert hours to minutes
+            let hours = Math.floor(timeLeft / 60);
+            let minutes = Math.round(timeLeft % 60);
+            
+            document.getElementById(resultId).innerText = `${hours} hr ${minutes} min left until ${target} hrs.`;
+        }
+    </script>
+</body>
+</html>
