@@ -145,29 +145,36 @@
         function formatNumber(num) {
             return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
-
+    
         function generateTable() {
             const initialDeposit = parseFloat(document.getElementById('initialDeposit').value);
             const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
             const cutPercent = parseFloat(document.getElementById('cutPercent').value) / 100;
             const years = parseInt(document.getElementById('years').value);
             const taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
-
+    
             const totalMonths = years * 12;
             let balance = initialDeposit;
             let tableBody = document.getElementById('resultTable').querySelector('tbody');
             tableBody.innerHTML = '';
-
+    
+            // Accumulate the interest after cut for each year
+            let yearInterestAfterCut = 0;
+    
             for (let month = 1; month <= totalMonths; month++) {
                 let interest = balance * interestRate;
                 let cutBalance = interest * cutPercent;
                 let interestAfterCut = interest - cutBalance;
+                // Accumulate this month's interest for the year
+                yearInterestAfterCut += interestAfterCut;
+    
                 let endingBalance = balance + interest - cutBalance;
-
+    
                 if (month % 12 === 0) {
-                    let tax = endingBalance * taxRate;
+                    // Calculate tax based on the sum of interestAfterCut for the year
+                    let tax = yearInterestAfterCut * taxRate;
                     let endBalanceAfterTaxes = endingBalance - tax;
-
+    
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${month}</td>
@@ -180,8 +187,11 @@
                         <td>${formatNumber(endBalanceAfterTaxes)}</td>
                     `;
                     tableBody.appendChild(row);
-
-                    balance = endBalanceAfterTaxes; // Update balance for the next year
+    
+                    // Update the balance for the next year using the balance after taxes
+                    balance = endBalanceAfterTaxes;
+                    // Reset the yearly accumulator
+                    yearInterestAfterCut = 0;
                 } else {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -195,11 +205,12 @@
                         <td></td>
                     `;
                     tableBody.appendChild(row);
-
-                    balance = endingBalance; // Update balance for the next month
+    
+                    // Update balance for the next month
+                    balance = endingBalance;
                 }
             }
         }
-    </script>
+    </script>    
 </body>
 </html>
