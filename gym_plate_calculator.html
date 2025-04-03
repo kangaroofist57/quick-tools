@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Plate Calculator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            background: #f0f4f8;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            margin: 0.5rem 0;
+            font-weight: 500;
+            color: #34495e;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #result {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            button {
+                width: 100%;
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Gym Plate Calculator</h2>
+        <label for="totalWeight">Enter Target Weight (lbs):</label>
+        <input type="number" id="totalWeight" min="0">
+
+        <label>
+            <input type="checkbox" id="includeBar" checked>
+            Include 45 lb Barbell
+        </label>
+
+        <label>
+            <input type="checkbox" id="includeExtraPlates">
+            Include 15 and 35 lb Plates
+        </label>
+
+        <button onclick="calculatePlates()">Calculate</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function calculatePlates() {
+            let plateWeights = [45, 25, 10, 5, 2.5];
+            const includeExtra = document.getElementById("includeExtraPlates").checked;
+            if (includeExtra) {
+                plateWeights = [45, 35, 25, 15, 10, 5, 2.5];
+            }
+
+            let totalWeight = parseFloat(document.getElementById("totalWeight").value);
+            const includeBar = document.getElementById("includeBar").checked;
+
+            if (isNaN(totalWeight) || totalWeight <= 0) {
+                document.getElementById("result").innerHTML = "Please enter a valid weight.";
+                return;
+            }
+
+            let barWeight = includeBar ? 45 : 0;
+            let weightPerSide = (totalWeight - barWeight) / 2;
+
+            if (weightPerSide < 0 || weightPerSide % 2.5 !== 0) {
+                document.getElementById("result").innerHTML = "Cannot evenly distribute weight.";
+                return;
+            }
+
+            let plates = [];
+            for (let plate of plateWeights) {
+                while (weightPerSide >= plate) {
+                    plates.push(plate);
+                    weightPerSide -= plate;
+                }
+            }
+
+            document.getElementById("result").innerHTML = plates.length > 0 ?
+                `Put these plates on each side: ${plates.join(', ')} lbs` :
+                "No additional plates needed.";
+        }
+    </script>
+</body>
+</html>
