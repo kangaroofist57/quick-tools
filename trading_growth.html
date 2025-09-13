@@ -36,7 +36,6 @@
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-start}
   .btn{appearance:none;border:none;outline:none;cursor:pointer;padding:12px 16px;border-radius:10px;font-weight:700;letter-spacing:.2px;font-size:15px;background:linear-gradient(180deg, var(--accent), #1287b8);color:#001018;box-shadow:0 6px 20px rgba(56,189,248,.35),0 0 0 1px rgba(56,189,248,.3) inset;}
   .btn.secondary{ background:#1f2937; color:#d1d5db; box-shadow:none; border:1px solid var(--border) }
-  .btn.ghost{ background:transparent; color:#9bd7ff; border:1px dashed rgba(56,189,248,.45) }
   .pill{font-size:12px;color:#9bd7ff;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.28);padding:6px 10px;border-radius:999px;}
   .assume{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .assume .chip{background:var(--chip);border:1px solid var(--border);color:var(--muted);padding:6px 10px;border-radius:999px;font-size:12px}
@@ -109,8 +108,6 @@
         <div class="row" style="margin-top:12px">
           <button class="btn" type="submit">Calculate</button>
           <button class="btn secondary" type="button" id="reset">Reset</button>
-          <button class="btn ghost" type="button" id="copyLink">Copy shareable link</button>
-          <span id="copied" class="pill" style="display:none">Link copied!</span>
         </div>
       </form>
     </div>
@@ -119,14 +116,13 @@
       <div class="card" id="topline"></div>
       <div id="yearBlocks" class="grid"></div>
       <div class="footer">
-        <div>Note: Monthly figures are <strong>pre-tax</strong>. Taxes are calculated from the full year’s profit only.</div>
+        <div>Note: Monthly figures are <strong>pre-tax</strong>. Taxes are calculated from the full year’s <em>profit</em> only (no tax on losses).</div>
         <div>All values in USD (2-decimal rounding).</div>
       </div>
     </div>
 
     <p class="note">
       Example check: Initial <code>25000</code>, <strong>TP</strong> <code>0.5</code>, Salary <code>18000</code>, Tax <code>30</code>, Years <code>1</code> → Final ≈ <strong>$47,428.57</strong>.
-      Shareable format: <code>?initial=25000&tp=0.5&salary=18000&tax=30&years=1</code>
     </p>
   </div>
 
@@ -138,80 +134,46 @@
   const DAYS_PER_MONTH = 20;
   const DAYS_PER_YEAR  = 240;
 
+  // Default field values (no URL params)
+  const DEFAULTS = {
+    tp: 0.5,  // %
+    tax: 30,  // %
+    salary: 0
+  };
+
   // DOM helpers
   const $ = sel => document.querySelector(sel);
   const form = $('#form');
   const out  = $('#output');
   const yearBlocks = $('#yearBlocks');
   const topline = $('#topline');
-  const copied = $('#copied');
 
-  // Parse URL params on load & prefill inputs
-  const params = new URLSearchParams(location.search);
-  const getParamNum = (key, defVal) => {
-    const v = params.get(key);
-    if (v === null || v === '') return defVal;
-    const n = parseFloat(v);
-    return isNaN(n) ? defVal : n;
-  };
-
-  // Defaults
-  const defaults = {
-    initial: null,     // required; no default
-    tp: 0.5,           // % per day
-    salary: 0,
-    tax: 30,
-    years: null        // required; no default
-  };
-
-  // Prefill fields
-  $('#initial').value = valueOrEmpty(getParamNum('initial', defaults.initial));
-  $('#tp').value      = valueOrEmpty(getParamNum('tp', defaults.tp));
-  $('#salary').value  = valueOrEmpty(getParamNum('salary', defaults.salary));
-  $('#tax').value     = valueOrEmpty(getParamNum('tax', defaults.tax));
-  $('#years').value   = valueOrEmpty(getParamNum('years', defaults.years));
-
-  // If required params present, auto-calc
-  if ($('#initial').value && $('#tp').value && $('#years').value) {
-    simulate();
-  }
+  // Prefill defaults to make it quicker to try
+  $('#tp').value  = DEFAULTS.tp;
+  $('#tax').value = DEFAULTS.tax;
 
   // Events
   form.addEventListener('submit', (e) => { e.preventDefault(); simulate(); });
   $('#reset').addEventListener('click', () => {
     form.reset();
     // restore soft defaults
-    $('#tp').value = defaults.tp;
-    $('#tax').value = defaults.tax;
-    $('#salary').value = '';
+    $('#tp').value = DEFAULTS.tp;
+    $('#tax').value = DEFAULTS.tax;
     out.style.display = 'none';
     yearBlocks.innerHTML = '';
     topline.innerHTML = '';
-    copied.style.display = 'none';
-    history.replaceState({}, '', location.pathname); // clear URL params
-  });
-
-  $('#copyLink').addEventListener('click', async () => {
-    const sharable = buildURLWithParams(readInputs());
-    try {
-      await navigator.clipboard.writeText(sharable);
-      copied.style.display = '';
-      setTimeout(()=>copied.style.display='none', 1600);
-    } catch {
-      // fallback: show prompt
-      window.prompt('Copy this link:', sharable);
-    }
   });
 
   function simulate(){
-    const { initial, tpPct, salary, taxPct, years } = readInputs(true);
+    const initial = toNum($('#initial').value);
+    const tpPct   = toNum($('#tp').value, DEFAULTS.tp);
+    const salary  = clampMin(toNum($('#salary').value, DEFAULTS.salary), 0);
+    const taxPct  = clamp(toNum($('#tax').value, DEFAULTS.tax), 0, 100);
+    const years   = Math.max(1, Math.floor(toNum($('#years').value)));
+
     if (!isFinite(initial) || initial <= 0) { alert('Please enter a valid Initial contribution (> 0).'); return; }
     if (!isFinite(tpPct)) { alert('Please enter a valid Daily TP (%).'); return; }
     if (!Number.isInteger(years) || years < 1) { alert('Years must be a whole number ≥ 1.'); return; }
-
-    // Sync URL for sharing
-    const url = buildURLWithParams({ initial, tpPct, salary, taxPct, years });
-    history.replaceState({}, '', url);
 
     // Factors
     const dailyFactor   = 1 + (tpPct / 100);
@@ -236,7 +198,7 @@
       // Year summary
       const grossEnd = start * yearlyFactor;
       const profitBeforeTax = grossEnd - start;
-      const taxes = profitBeforeTax * (taxPct / 100);
+      const taxes = profitBeforeTax > 0 ? profitBeforeTax * (taxPct / 100) : 0; // tax only on profits
       const afterTaxProfit = profitBeforeTax - taxes;
       const postTaxBeforeSalary = start + afterTaxProfit;
       const endAfterSalary = postTaxBeforeSalary - salary;
@@ -263,27 +225,7 @@
     out.style.display = '';
   }
 
-  function readInputs(applyDefaults=false){
-    const initial = toNum($('#initial').value, applyDefaults ? 0 : NaN);
-    const tpPct   = toNum($('#tp').value, applyDefaults ? defaults.tp : NaN);
-    const salary  = clampMin(toNum($('#salary').value, applyDefaults ? defaults.salary : 0), 0);
-    const taxPct  = clamp(toNum($('#tax').value, applyDefaults ? defaults.tax : 30), 0, 100);
-    const years   = Math.max(1, Math.floor(toNum($('#years').value, applyDefaults ? 1 : NaN)));
-    return { initial, tpPct, salary, taxPct, years };
-  }
-
-  function buildURLWithParams({ initial, tpPct, salary, taxPct, years }){
-    const u = new URL(location.href);
-    u.searchParams.set('initial', String(initial));
-    u.searchParams.set('tp', String(tpPct));
-    u.searchParams.set('salary', String(salary));
-    u.searchParams.set('tax', String(taxPct));
-    u.searchParams.set('years', String(years));
-    return u.pathname + u.search;
-  }
-
   function renderTopline(initial, tpPct, salary, taxPct, results, monthlyFactor, yearlyFactor){
-    const first = results[0];
     const last = results[results.length - 1] || { endAfterSalary: initial };
     const monthlyPreview = initial * monthlyFactor;
     const yearlyPreview = initial * yearlyFactor;
@@ -325,11 +267,12 @@
   }
 
   function renderYears(results, taxPct){
+    const fmtPct = (x)=> (x*100).toFixed(2) + '%';
     yearBlocks.innerHTML = '';
     results.forEach((r, idx) => {
       const yrTitle = `Year ${r.year}`;
       const open = idx === 0 ? ' open' : '';
-      const yld = r.profitBeforeTax / r.start;
+      const yld = r.start === 0 ? 0 : r.profitBeforeTax / r.start;
 
       const yearHTML = `
         <details${open}>
@@ -338,7 +281,7 @@
               ${yrTitle}
               <span class="year-tag"> • Start: ${fmt.format(r.start)} • End (after salary): <strong>${fmt.format(r.endAfterSalary)}</strong></span>
             </span>
-            <span class="year-tag">${(yld*100).toFixed(2)}% gross return</span>
+            <span class="year-tag">${fmtPct(yld)} gross return</span>
           </summary>
 
           <div class="tbl-wrap">
@@ -403,7 +346,6 @@
   function clamp(n, a, b){ return Math.min(Math.max(n, a), b); }
   function clampMin(n, a){ return Math.max(n, a); }
   function sum(arr){ return arr.reduce((s,x)=>s+(+x||0),0); }
-  function valueOrEmpty(v){ return v===null || v===undefined ? '' : String(v); }
 })();
 </script>
 </body>
