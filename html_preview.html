@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>HTML Preview — Fullscreen with Exit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;         /* slate-900 */
+      --panel: #111827;      /* gray-900 */
+      --muted: #94a3b8;      /* slate-400 */
+      --fg: #e5e7eb;         /* gray-200 */
+      --accent: #22d3ee;     /* cyan-400 */
+      --accent-2: #60a5fa;   /* blue-400 */
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; background: radial-gradient(1200px 800px at 10% 0%, #0b1220 0, var(--bg) 60%);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--fg);
+      line-height: 1.4;
+    }
+
+    /* Layout */
+    .wrap {
+      max-width: 1100px; margin: 48px auto; padding: 0 20px;
+    }
+    header { margin-bottom: 18px; }
+    h1 {
+      margin: 0 0 6px; font-size: 1.6rem; font-weight: 700;
+      letter-spacing: .2px;
+    }
+    p.sub { margin: 0; color: var(--muted); }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .toolbar {
+      display: flex; gap: 12px; align-items: center;
+      padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.06);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+    }
+    .toolbar .spacer { flex: 1; }
+
+    textarea {
+      width: 100%; min-height: 55vh; resize: vertical; border: 0; outline: none;
+      padding: 18px; font: 500 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      background: transparent; color: var(--fg);
+    }
+    textarea::placeholder { color: #64748b; }
+
+    .btn {
+      appearance: none; border: 0; cursor: pointer; user-select: none;
+      padding: 10px 14px; border-radius: 10px; font-weight: 700; letter-spacing: .2px;
+      color: #0b1020; background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      box-shadow: 0 6px 16px rgba(34, 211, 238, .28);
+    }
+    .btn:active { transform: translateY(1px); }
+
+    .chk {
+      display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-weight: 600;
+    }
+    .chk input { width: 18px; height: 18px; }
+
+    footer {
+      color: var(--muted); font-size: 12px; margin-top: 12px; text-align: center;
+    }
+
+    /* Fullscreen Preview */
+    .preview-root {
+      position: fixed; inset: 0; z-index: 9999;
+      display: grid; grid-template-rows: auto 1fr;
+      background: #000;
+    }
+    .preview-bar {
+      position: relative;
+      display: flex; align-items: center; justify-content: flex-end;
+      padding: 8px; background: rgba(15, 23, 42, .75);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(6px);
+    }
+    .close {
+      appearance: none; cursor: pointer; border: 0;
+      width: 36px; height: 36px; border-radius: 999px;
+      background: rgba(255,255,255,.9);
+      display: grid; place-items: center; font-size: 18px; font-weight: 900; color: #0a0a0a;
+      box-shadow: 0 6px 16px rgba(0,0,0,.35);
+    }
+    .close:active { transform: translateY(1px); }
+    .preview-iframe {
+      width: 100%; height: 100%; border: 0; background: white;
+    }
+
+    @media (max-width: 720px) {
+      textarea { min-height: 60vh; }
+      .btn { padding: 10px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>HTML Preview (Fullscreen + Exit)</h1>
+      <p class="sub">Paste HTML below, then click <b>Preview</b>. Your content will render fullscreen with a fixed ✕ to return.</p>
+    </header>
+
+    <section class="panel" role="region" aria-labelledby="editorLabel">
+      <div class="toolbar">
+        <div class="chk" title="Allow scripts inside your pasted HTML to run inside a sandboxed iframe.">
+          <input type="checkbox" id="allowScripts" />
+          <label for="allowScripts">Allow scripts</label>
+        </div>
+        <div class="chk" title="Permit popups from your preview (still sandboxed).">
+          <input type="checkbox" id="allowPopups" />
+          <label for="allowPopups">Allow popups</label>
+        </div>
+        <div class="chk" title="Gives the iframe same-origin with itself (not the parent). Needed for some advanced APIs.">
+          <input type="checkbox" id="allowSameOrigin" />
+          <label for="allowSameOrigin">Same-origin (iframe)</label>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" id="previewBtn" type="button">Preview ⤴</button>
+      </div>
+
+      <label id="editorLabel" for="htmlInput" style="position: absolute; left: -9999px;">HTML input</label>
+      <textarea id="htmlInput" placeholder="&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;title&gt;My Test&lt;/title&gt;
+    &lt;style&gt;body { font: 20px system-ui; padding: 24px } .box { padding: 12px; background:#eef }&lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello from your HTML&lt;/h1&gt;
+    &lt;div class=&quot;box&quot;&gt;This is rendered fullscreen. Click the ✕ to go back.&lt;/div&gt;
+    &lt;script&gt;console.log('Running inside sandboxed preview');&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;"></textarea>
+    </section>
+
+    <footer>
+      Tip: Press <b>Esc</b> while previewing to return. Your last code is saved locally.
+    </footer>
+  </div>
+
+  <template id="previewTemplate">
+    <div class="preview-root" role="dialog" aria-modal="true" aria-label="HTML preview">
+      <div class="preview-bar">
+        <button class="close" type="button" title="Close preview (Esc)" aria-label="Close preview">✕</button>
+      </div>
+      <iframe class="preview-iframe" sandbox=""></iframe>
+    </div>
+  </template>
+
+  <script>
+    (function () {
+      const input = document.getElementById('htmlInput');
+      const previewBtn = document.getElementById('previewBtn');
+      const tpl = document.getElementById('previewTemplate');
+      const allowScripts = document.getElementById('allowScripts');
+      const allowPopups = document.getElementById('allowPopups');
+      const allowSameOrigin = document.getElementById('allowSameOrigin');
+
+      // Restore last input
+      try {
+        const saved = localStorage.getItem('html-preview:last');
+        if (saved && !input.value.trim()) input.value = saved;
+      } catch {}
+
+      function buildSandboxAttr() {
+        // Start with minimal sandbox (everything blocked), then add explicit allowances
+        const flags = new Set([
+          'allow-forms',
+          'allow-modals',
+          'allow-pointer-lock',
+          'allow-presentation',
+          // Note: we deliberately DO NOT include 'allow-top-navigation' or 'allow-top-navigation-by-user-activation'
+        ]);
+        if (allowScripts.checked) flags.add('allow-scripts');
+        if (allowPopups.checked) flags.add('allow-popups');
+        // Same-origin here applies to the iframe's own origin context (still isolated from parent);
+        // without it, some APIs are restricted (like localStorage inside the iframe).
+        if (allowSameOrigin.checked) flags.add('allow-same-origin');
+        return Array.from(flags).join(' ');
+      }
+
+      function openPreview(html) {
+        // Create overlay
+        const node = tpl.content.firstElementChild.cloneNode(true);
+        const frame = node.querySelector('iframe');
+        const closeBtn = node.querySelector('.close');
+
+        // Configure sandbox
+        frame.setAttribute('sandbox', buildSandboxAttr());
+
+        // Load content via srcdoc to avoid blob URLs and keep it self-contained
+        frame.srcdoc = html;
+
+        // Lock background scroll
+        const oldOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        // Close logic
+        const cleanup = () => {
+          window.removeEventListener('keydown', onKey);
+          document.body.style.overflow = oldOverflow;
+          node.remove();
+          input.focus();
+        };
+        const onKey = (e) => {
+          if (e.key === 'Escape') cleanup();
+        };
+        window.addEventListener('keydown', onKey);
+        closeBtn.addEventListener('click', cleanup);
+
+        // Mount
+        document.body.appendChild(node);
+      }
+
+      previewBtn.addEventListener('click', () => {
+        const html = input.value || '';
+        // Save last input
+        try { localStorage.setItem('html-preview:last', html); } catch {}
+        if (!html.trim()) {
+          alert('Please paste some HTML first.');
+          input.focus();
+          return;
+        }
+        openPreview(html);
+      });
+    })();
+  </script>
+</body>
+</html>
