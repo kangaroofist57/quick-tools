@@ -2,350 +2,443 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Trading Growth & Salary Planner</title>
 <style>
   :root{
-    --bg:#0f172a;        /* slate-900 */
-    --panel:#111827;     /* gray-900 */
-    --muted:#94a3b8;     /* slate-400 */
-    --text:#e5e7eb;      /* gray-200 */
-    --accent:#38bdf8;    /* sky-400 */
-    --accent-2:#22c55e;  /* green-500 */
-    --danger:#ef4444;    /* red-500 */
-    --border:#1f2937;    /* gray-800 */
-    --chip:#0b1222;
+    --bg:#0c0f14;
+    --panel:#121722;
+    --panel-2:#171d2a;
+    --ink:#e6edf3;
+    --muted:#9fb0c3;
+    --accent:#4cc9f0;
+    --good:#22c55e;
+    --warn:#f59e0b;
+    --bad:#ef4444;
+    --grid:#1f2937;
+    --chip:#0b2431;
+    --shadow:0 10px 30px rgba(0,0,0,.4), 0 0 0 1px rgba(76,201,240,.04) inset;
+    --radius:14px;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Ubuntu,"Helvetica Neue",Arial;
-    background: radial-gradient(1200px 600px at 50% -200px, #13233a 0%, var(--bg) 60%);
-    color:var(--text);
+  html,body{background:var(--bg); color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji"; margin:0;}
+  .wrap{max-width:1100px; margin:0 auto; padding:18px;}
+  header{
+    border-radius:var(--radius);
+    padding:20px 18px;
+    background:linear-gradient(180deg, #0f1420 0%, #0b0f17 100%);
+    position:relative; overflow:hidden;
+    box-shadow:var(--shadow);
   }
-  .wrap{max-width:1000px;margin:0 auto;padding:20px 16px 40px}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
-  .title{font-weight:800;letter-spacing:.3px;font-size:clamp(20px,4vw,28px);}
-  .badge{font-size:12px;color:var(--accent);background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);padding:6px 10px;border-radius:999px;white-space:nowrap;}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));border:1px solid var(--border);border-radius:14px;padding:14px 14px;box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 10px 40px rgba(0,0,0,.35);}
-  .inputs{display:grid;gap:12px;grid-template-columns:1fr 1fr; margin-top:8px;}
-  @media (max-width:720px){ .inputs{grid-template-columns:1fr} }
-  label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-  .field{display:flex;align-items:center;gap:8px;background:#0b1020;border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
-  .field input{width:100%;font-size:16px;background:transparent;border:none;outline:none;color:var(--text);}
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-start}
-  .btn{appearance:none;border:none;outline:none;cursor:pointer;padding:12px 16px;border-radius:10px;font-weight:700;letter-spacing:.2px;font-size:15px;background:linear-gradient(180deg, var(--accent), #1287b8);color:#001018;box-shadow:0 6px 20px rgba(56,189,248,.35),0 0 0 1px rgba(56,189,248,.3) inset;}
-  .btn.secondary{ background:#1f2937; color:#d1d5db; box-shadow:none; border:1px solid var(--border) }
-  .pill{font-size:12px;color:#9bd7ff;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.28);padding:6px 10px;border-radius:999px;}
-  .assume{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .assume .chip{background:var(--chip);border:1px solid var(--border);color:var(--muted);padding:6px 10px;border-radius:999px;font-size:12px}
-  .grid{display:grid;gap:12px;grid-template-columns:1fr;margin-top:14px;}
-  .summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;}
-  @media (max-width:860px){ .summary{ grid-template-columns:1fr } }
-  .metric{background:#0b1020;border:1px solid var(--border);border-radius:12px;padding:12px;}
-  .metric .k{font-size:12px;color:var(--muted)}
-  .metric .v{font-size:22px;font-weight:800;margin-top:2px}
-  .metric.positive .v{color:var(--accent-2)}
-  .metric.negative .v{color:var(--danger)}
-  details{background:#0b1020;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-  summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
-  summary::-webkit-details-marker{display:none}
-  .year-tag{font-size:12px;color:var(--muted)}
-  .tbl-wrap{overflow:auto;border-top:1px solid var(--border)}
-  table{width:100%;border-collapse:separate;border-spacing:0}
-  th, td{padding:10px 12px;text-align:right;white-space:nowrap}
-  th:first-child, td:first-child{text-align:left}
-  thead th{position:sticky;top:0;background:#0c1324;z-index:1;font-size:12px;color:var(--muted);border-bottom:1px solid var(--border)}
-  tbody tr:nth-child(odd){background:#0c13241a}
-  tfoot td{font-weight:800;border-top:1px solid var(--border);background:#0c1324}
-  .note{color:var(--muted);font-size:12px;margin-top:10px;line-height:1.5}
-  .footer{margin-top:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px}
+  header .brand{display:flex; gap:12px; align-items:center;}
+  .logo{
+    width:36px;height:36px;border-radius:8px;
+    background: radial-gradient(100% 100% at 50% 0%, #2dd4bf 0%, #3b82f6 60%, #8b5cf6 100%);
+    box-shadow:0 8px 28px rgba(59,130,246,.35);
+  }
+  h1{font-size:20px; margin:0;}
+  p.sub{margin:6px 0 0 0; color:var(--muted); font-size:13px;}
+  .panel{
+    background:var(--panel);
+    border-radius:var(--radius);
+    padding:14px;
+    box-shadow:var(--shadow);
+  }
+  .grid{
+    display:grid; gap:10px;
+    grid-template-columns: repeat(12, 1fr);
+  }
+  .grid .panel{grid-column: span 12;}
+  @media (min-width:760px){
+    .grid .inputs{grid-column: span 12;}
+    .grid .summary{grid-column: span 12;}
+    .grid .tablewrap{grid-column: span 12;}
+  }
+  .inputs form{display:grid; gap:10px; grid-template-columns:repeat(12,1fr);}
+  .inputs .field{grid-column: span 12;}
+  @media (min-width:680px){
+    .inputs .field.sm-6{grid-column: span 6;}
+    .inputs .field.sm-4{grid-column: span 4;}
+    .inputs .field.sm-3{grid-column: span 3;}
+  }
+  label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px;}
+  input, select{
+    width:100%; box-sizing:border-box; border-radius:10px; border:1px solid #263041;
+    padding:12px 12px; background:var(--panel-2); color:var(--ink); font-size:14px; outline:none;
+  }
+  input:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(76,201,240,.12);}
+  .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;}
+  button{
+    background:var(--accent); color:#001018; border:none; border-radius:10px; padding:12px 14px; font-weight:700; cursor:pointer;
+  }
+  button.secondary{background:#223043; color:var(--ink);}
+  .hint{font-size:12px; color:var(--muted); margin-top:4px;}
+  .summary .cards{display:grid; gap:10px; grid-template-columns:repeat(12,1fr);}
+  .card{grid-column: span 12; background:var(--panel-2); border-radius:12px; padding:12px; border:1px solid #1d2635;}
+  @media (min-width:680px){
+    .card{grid-column: span 4;}
+  }
+  .k{font-size:12px; color:var(--muted);}
+  .v{font-size:20px; font-weight:800; margin-top:4px;}
+  .good{color:var(--good)}
+  .bad{color:var(--bad)}
+  .tablewrap{padding:0;}
+  .tablewrap .toprow{display:flex; justify-content:space-between; gap:10px; align-items:end; margin-bottom:8px; flex-wrap:wrap;}
+  .tablewrap .toprow .chips{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{
+    background:var(--chip); color:#a8e9ff; border:1px solid #1c3441;
+    padding:6px 8px; border-radius:999px; font-size:12px;
+  }
+  .table-box{overflow:auto; border:1px solid #1d2635; border-radius:12px;}
+  table{width:100%; border-collapse:separate; border-spacing:0; min-width:840px; background:var(--panel-2);}
+  thead th{
+    position:sticky; top:0; background:#101626; z-index:5;
+    text-align:left; font-size:12px; color:#c9d6e3; padding:10px; border-bottom:1px solid #233149;
+  }
+  tbody td{padding:10px; border-bottom:1px solid #1f2a3e; font-size:13px;}
+  tbody tr.year-header td{
+    background:#0f1524; color:#b8cff1; font-weight:800; border-bottom:1px solid #22314b;
+  }
+  tbody tr.total-row{background:#0e1625;}
+  tbody tr.total-row td{border-top:1px dashed #2a3a57;}
+  .right{text-align:right;}
+  .muted{color:var(--muted);}
+  details{
+    background:var(--panel-2);
+    border:1px solid #1d2635;
+    border-radius:12px; padding:12px; margin-top:10px;
+  }
+  details > summary{cursor:pointer; font-weight:700}
+  .foot{color:var(--muted); font-size:12px; margin-top:8px;}
+  .warn{color:var(--warn);}
 </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <div class="title">Trading Growth & Salary Planner</div>
-      <div class="badge">Single trade/day • TP is configurable</div>
+    <header class="panel">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Trading Growth & Salary Planner</h1>
+          <p class="sub">Compounds daily take-profit, taxes once per year, then pays you a fixed salary. Monthly breakdowns are pre-tax; yearly rows show taxes & salary.</p>
+        </div>
+      </div>
     </header>
 
-    <div class="card">
-      <form id="form">
-        <div class="inputs">
-          <div>
-            <label for="initial">Initial contribution <span class="pill">required</span></label>
-            <div class="field"><span>$</span><input id="initial" type="number" step="0.01" min="0" placeholder="e.g. 25000" required /></div>
+    <div class="grid" style="margin-top:12px">
+      <section class="panel inputs">
+        <form id="form">
+          <div class="field sm-4">
+            <label for="initial">Initial contribution (USD) *</label>
+            <input id="initial" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g., 25000" required>
+          </div>
+          <div class="field sm-3">
+            <label for="tp">Daily TP % *</label>
+            <input id="tp" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g., 0.5" required>
+          </div>
+          <div class="field sm-3">
+            <label for="years">Years to compound *</label>
+            <input id="years" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g., 1" required>
+          </div>
+          <div class="field sm-3">
+            <label for="days">Trading days each year *</label>
+            <input id="days" type="number" inputmode="numeric" min="1" step="1" placeholder="Default 240" value="240" required>
+            <div class="hint">Monthly breakdown allocates these days across 12 months.</div>
+          </div>
+          <div class="field sm-3">
+            <label for="tax">Taxes on profits at year end % (optional)</label>
+            <input id="tax" type="number" inputmode="decimal" min="0" max="100" step="0.1" placeholder="Default 30" value="30">
+          </div>
+          <div class="field sm-3">
+            <label for="salary">Salary paid after taxes each year (USD, optional)</label>
+            <input id="salary" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Default 0" value="0">
           </div>
 
-          <div>
-            <label for="tp">Daily TP (%) <span class="pill">required</span></label>
-            <div class="field"><input id="tp" type="number" step="0.001" min="-100" max="100" placeholder="0.5" required /></div>
+          <div class="field sm-12">
+            <div class="actions">
+              <button type="button" id="calcBtn">Calculate</button>
+              <button type="button" class="secondary" id="exampleBtn">Try the example</button>
+              <button type="reset" class="secondary" id="resetBtn">Reset</button>
+            </div>
+            <div class="hint">Note: we compute using full precision and round only for display. Tiny 1-cent differences from hand-rounded examples can occur.</div>
           </div>
+        </form>
+      </section>
 
-          <div>
-            <label for="salary">Salary per year (after tax) <span class="pill">optional (default 0)</span></label>
-            <div class="field"><span>$</span><input id="salary" type="number" step="0.01" min="0" placeholder="e.g. 18000" /></div>
+      <section class="panel summary">
+        <div class="cards" id="summaryCards">
+          <div class="card">
+            <div class="k">Final balance</div>
+            <div class="v" id="finalBalance">$0.00</div>
+            <div class="foot" id="finalFoot">After salaries & taxes across all years.</div>
           </div>
-
-          <div>
-            <label for="tax">Tax rate on yearly profit <span class="pill">optional (default 30%)</span></label>
-            <div class="field"><input id="tax" type="number" step="0.01" min="0" max="100" placeholder="30" /></div>
+          <div class="card">
+            <div class="k">Total taxes paid</div>
+            <div class="v" id="totalTaxes">$0.00</div>
+            <div class="foot">Only applied to positive yearly profits.</div>
           </div>
-
-          <div>
-            <label for="years">Years to compound <span class="pill">required</span></label>
-            <div class="field"><input id="years" type="number" step="1" min="1" placeholder="e.g. 5" required /></div>
+          <div class="card">
+            <div class="k">Total salary paid</div>
+            <div class="v" id="totalSalary">$0.00</div>
+            <div class="foot" id="salaryWarn"></div>
           </div>
         </div>
+      </section>
 
-        <div class="assume" aria-hidden="true">
-          <div class="chip">Assumes exactly 1 trade per trading day</div>
-          <div class="chip">20 trading days per month</div>
-          <div class="chip">240 trading days per year</div>
-          <div class="chip">Taxes applied at year end only</div>
+      <section class="panel tablewrap">
+        <div class="toprow">
+          <div class="chips" id="chips"></div>
+          <div class="hint">Monthly rows are <span class="muted">pre-tax</span>. The yearly total row shows <span class="muted">taxes</span> and your <span class="muted">salary</span> deducted.</div>
         </div>
+        <div class="table-box">
+          <table id="resultTable" aria-describedby="tableDesc">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Period</th>
+                <th class="right">Days</th>
+                <th class="right">Year Start</th>
+                <th class="right">Period End</th>
+                <th class="right">Profit vs Year Start</th>
+                <th class="right">Taxes</th>
+                <th class="right">Salary</th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <!-- rows injected -->
+            </tbody>
+          </table>
+        </div>
+        <p id="tableDesc" class="foot">“Profit vs Year Start” is before tax on monthly rows; on yearly rows it is after tax (i.e., net profit for that year before salary).</p>
 
-        <div class="row" style="margin-top:12px">
-          <button class="btn" type="submit">Calculate</button>
-          <button class="btn secondary" type="button" id="reset">Reset</button>
-        </div>
-      </form>
+        <details>
+          <summary>How the math works</summary>
+          <div class="foot" style="margin-top:8px">
+            <ol>
+              <li><b>Daily compounding:</b> If your daily TP is <i>r%</i> and a year has <i>D</i> trading days, the pre-tax end-of-year balance is <code>Start × (1 + r/100)<sup>D</sup></code>.</li>
+              <li><b>Yearly profit:</b> <code>GrossProfit = EndPreTax − Start</code>.</li>
+              <li><b>Taxes at year end:</b> <code>Taxes = max(0, GrossProfit × tax%)</code>. (No tax on losses.)</li>
+              <li><b>After-tax profit:</b> <code>NetProfit = GrossProfit − Taxes</code>.</li>
+              <li><b>Pay yourself:</b> <code>YearEnd = Start + NetProfit − Salary</code>. This result becomes next year’s starting balance.</li>
+              <li><b>Monthly breakdown:</b> We split the year’s trading days across 12 months and compound sequentially. Monthly rows are always pre-tax.</li>
+            </ol>
+            <p class="foot">Example you gave: Start 25,000; r=0.5%; D=240; Tax 30%; Salary 18,000 ⇒ Pre-tax end ≈ 82,755.11; Gross profit ≈ 57,755.11; Net profit ≈ 40,428.58; Final after salary ≈ <b>$47,428.58</b>. (A 1-cent difference vs hand-rounded steps is normal.)</p>
+          </div>
+        </details>
+      </section>
     </div>
-
-    <div id="output" class="grid" style="display:none">
-      <div class="card" id="topline"></div>
-      <div id="yearBlocks" class="grid"></div>
-      <div class="footer">
-        <div>Note: Monthly figures are <strong>pre-tax</strong>. Taxes are calculated from the full year’s <em>profit</em> only (no tax on losses).</div>
-        <div>All values in USD (2-decimal rounding).</div>
-      </div>
-    </div>
-
-    <p class="note">
-      Example check: Initial <code>25000</code>, <strong>TP</strong> <code>0.5</code>, Salary <code>18000</code>, Tax <code>30</code>, Years <code>1</code> → Final ≈ <strong>$47,428.57</strong>.
-    </p>
   </div>
 
 <script>
-(() => {
-  const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+(function(){
+  const $ = (sel)=>document.querySelector(sel);
+  const fmtUSD = (n)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0);
+  const fmtPct = (n)=>`${Number(n).toFixed(2)}%`;
+  const monthNames = ["M1","M2","M3","M4","M5","M6","M7","M8","M9","M10","M11","M12"];
 
-  // Fixed assumptions
-  const DAYS_PER_MONTH = 20;
-  const DAYS_PER_YEAR  = 240;
-
-  // Default field values (no URL params)
-  const DEFAULTS = {
-    tp: 0.5,  // %
-    tax: 30,  // %
-    salary: 0
+  const els = {
+    initial: $('#initial'),
+    tp: $('#tp'),
+    years: $('#years'),
+    days: $('#days'),
+    tax: $('#tax'),
+    salary: $('#salary'),
+    calcBtn: $('#calcBtn'),
+    exampleBtn: $('#exampleBtn'),
+    resetBtn: $('#resetBtn'),
+    tbody: $('#tbody'),
+    chips: $('#chips'),
+    finalBalance: $('#finalBalance'),
+    totalTaxes: $('#totalTaxes'),
+    totalSalary: $('#totalSalary'),
+    finalFoot: $('#finalFoot'),
+    salaryWarn: $('#salaryWarn'),
   };
 
-  // DOM helpers
-  const $ = sel => document.querySelector(sel);
-  const form = $('#form');
-  const out  = $('#output');
-  const yearBlocks = $('#yearBlocks');
-  const topline = $('#topline');
+  // Smart distribution of trading days across 12 months (sums exactly to D)
+  function splitDaysAcrossMonths(totalDays){
+    const base = Math.floor(totalDays / 12);
+    let remainder = totalDays - base*12;
+    const arr = new Array(12).fill(base);
+    // distribute the remainder one per month starting from the early months
+    for(let i=0;i<remainder;i++){ arr[i] += 1; }
+    return arr;
+  }
 
-  // Prefill defaults to make it quicker to try
-  $('#tp').value  = DEFAULTS.tp;
-  $('#tax').value = DEFAULTS.tax;
+  function calcPlan({initial, tpPct, years, daysPerYear, taxPct, salary}){
+    const tp = tpPct/100; // daily rate (decimal)
+    const tax = taxPct/100;
+    let balance = initial;
+    let totalTaxes = 0;
+    let totalSalary = 0;
+    const rows = [];
+    const chips = [];
 
-  // Events
-  form.addEventListener('submit', (e) => { e.preventDefault(); simulate(); });
-  $('#reset').addEventListener('click', () => {
-    form.reset();
-    // restore soft defaults
-    $('#tp').value = DEFAULTS.tp;
-    $('#tax').value = DEFAULTS.tax;
-    out.style.display = 'none';
-    yearBlocks.innerHTML = '';
-    topline.innerHTML = '';
-  });
-
-  function simulate(){
-    const initial = toNum($('#initial').value);
-    const tpPct   = toNum($('#tp').value, DEFAULTS.tp);
-    const salary  = clampMin(toNum($('#salary').value, DEFAULTS.salary), 0);
-    const taxPct  = clamp(toNum($('#tax').value, DEFAULTS.tax), 0, 100);
-    const years   = Math.max(1, Math.floor(toNum($('#years').value)));
-
-    if (!isFinite(initial) || initial <= 0) { alert('Please enter a valid Initial contribution (> 0).'); return; }
-    if (!isFinite(tpPct)) { alert('Please enter a valid Daily TP (%).'); return; }
-    if (!Number.isInteger(years) || years < 1) { alert('Years must be a whole number ≥ 1.'); return; }
-
-    // Factors
-    const dailyFactor   = 1 + (tpPct / 100);
-    const monthlyFactor = Math.pow(dailyFactor, DAYS_PER_MONTH);
-    const yearlyFactor  = Math.pow(dailyFactor, DAYS_PER_YEAR);
-
-    // Run simulation
-    const results = [];
-    let capital = initial;
-
-    for (let y = 1; y <= years; y++) {
-      const start = capital;
-
-      // Monthly (pre-tax) breakdown vs Year Start
-      const months = [];
-      for (let m = 1; m <= 12; m++) {
-        const endBal = start * Math.pow(monthlyFactor, m);
-        const profitVsStart = endBal - start;
-        months.push({ month: m, endBalance: endBal, profitVsStart });
+    for(let y=1; y<=years; y++){
+      const yearStart = balance;
+      const monthDays = splitDaysAcrossMonths(daysPerYear);
+      // monthly, pre-tax
+      for(let m=0;m<12;m++){
+        const days = monthDays[m];
+        const end = balance * Math.pow(1+tp, days);
+        const profitVsStart = end - yearStart;
+        rows.push({
+          type:'month', year:y, period:monthNames[m],
+          days, yearStart, end, profitVsStart,
+          taxes: 0, salary: 0
+        });
+        balance = end; // roll forward
       }
+      // end of year adjustments
+      const endPreTax = balance;
+      const grossProfit = endPreTax - yearStart;
+      const taxes = Math.max(0, grossProfit * tax);
+      const netProfit = grossProfit - taxes;
+      const endAfterTax = yearStart + netProfit;
+      const endAfterSalary = endAfterTax - salary;
 
-      // Year summary
-      const grossEnd = start * yearlyFactor;
-      const profitBeforeTax = grossEnd - start;
-      const taxes = profitBeforeTax > 0 ? profitBeforeTax * (taxPct / 100) : 0; // tax only on profits
-      const afterTaxProfit = profitBeforeTax - taxes;
-      const postTaxBeforeSalary = start + afterTaxProfit;
-      const endAfterSalary = postTaxBeforeSalary - salary;
+      totalTaxes += taxes;
+      totalSalary += salary;
 
-      results.push({
-        year: y,
-        start,
-        grossEnd,
-        profitBeforeTax,
-        taxes,
-        afterTaxProfit,
-        postTaxBeforeSalary,
-        salaryPaid: salary,
-        endAfterSalary,
-        months
+      rows.push({
+        type:'year', year:y, period:'Year Total',
+        days: daysPerYear, yearStart,
+        end: endAfterSalary, // final for the year (after tax & salary)
+        profitVsStart: netProfit, // after-tax profit for the year
+        taxes, salary
       });
 
-      capital = endAfterSalary;
-      if (capital <= 0) break; // stop if depleted
+      // Next year starts from end-of-year balance (can go negative if salary > funds)
+      balance = endAfterSalary;
+      // year chip
+      chips.push({
+        y,
+        start: yearStart,
+        end: endAfterSalary,
+        days: daysPerYear
+      });
     }
 
-    renderTopline(initial, tpPct, salary, taxPct, results, monthlyFactor, yearlyFactor);
-    renderYears(results, taxPct);
-    out.style.display = '';
+    return {rows, finalBalance: balance, totalTaxes, totalSalary, chips};
   }
 
-  function renderTopline(initial, tpPct, salary, taxPct, results, monthlyFactor, yearlyFactor){
-    const last = results[results.length - 1] || { endAfterSalary: initial };
-    const monthlyPreview = initial * monthlyFactor;
-    const yearlyPreview = initial * yearlyFactor;
-    const finalCarry = last.endAfterSalary;
-    const totalTaxes = sum(results.map(r => r.taxes));
-    const totalSalary = sum(results.map(r => r.salaryPaid));
-    const danger = finalCarry < 0;
+  function render({rows, finalBalance, totalTaxes, totalSalary, chips}){
+    // Summary cards
+    els.finalBalance.textContent = fmtUSD(finalBalance);
+    els.totalTaxes.textContent = fmtUSD(totalTaxes);
+    els.totalSalary.textContent = fmtUSD(totalSalary);
+    els.finalFoot.textContent = `After ${chips.length} year${chips.length>1?'s':''} of compounding.`;
+    els.salaryWarn.textContent = '';
 
-    topline.innerHTML = `
-      <div class="row" style="justify-content:space-between; gap:8px; flex-wrap:wrap">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <div class="pill">TP/day: ${(+tpPct).toFixed(3).replace(/\.?0+$/,'')}%</div>
-          <div class="pill">20 trading days / month</div>
-          <div class="pill">240 trading days / year</div>
-        </div>
-        <div class="year-tag">Horizon: <strong>${results.length}</strong> ${results.length===1?'year':'years'}</div>
-      </div>
+    if(finalBalance < 0){
+      els.finalBalance.classList.add('bad');
+      els.finalFoot.textContent += ' Balance is negative because salary exceeded funds.';
+    } else {
+      els.finalBalance.classList.remove('bad');
+    }
 
-      <div class="summary">
-        <div class="metric">
-          <div class="k">1-Month Preview (pre-tax)</div>
-          <div class="v">${fmt.format(monthlyPreview)}</div>
-          <div class="k" style="margin-top:4px">Profit vs start: ${fmt.format(monthlyPreview - initial)}</div>
-        </div>
+    // Chips
+    els.chips.innerHTML = chips.map(c=>(
+      `<span class="chip">Y${c.y}: ${fmtUSD(c.start)} → ${fmtUSD(c.end)} · ${c.days}d</span>`
+    )).join('');
 
-        <div class="metric">
-          <div class="k">1-Year Preview (pre-tax)</div>
-          <div class="v">${fmt.format(yearlyPreview)}</div>
-          <div class="k" style="margin-top:4px">Profit vs start: ${fmt.format(yearlyPreview - initial)}</div>
-        </div>
-
-        <div class="metric ${danger ? 'negative':'positive'}">
-          <div class="k">Final Balance after taxes & salary</div>
-          <div class="v">${fmt.format(finalCarry)}</div>
-          <div class="k" style="margin-top:4px">Total taxes over horizon: ${fmt.format(totalTaxes)} • Total salary paid: ${fmt.format(totalSalary)}</div>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderYears(results, taxPct){
-    const fmtPct = (x)=> (x*100).toFixed(2) + '%';
-    yearBlocks.innerHTML = '';
-    results.forEach((r, idx) => {
-      const yrTitle = `Year ${r.year}`;
-      const open = idx === 0 ? ' open' : '';
-      const yld = r.start === 0 ? 0 : r.profitBeforeTax / r.start;
-
-      const yearHTML = `
-        <details${open}>
-          <summary>
-            <span>
-              ${yrTitle}
-              <span class="year-tag"> • Start: ${fmt.format(r.start)} • End (after salary): <strong>${fmt.format(r.endAfterSalary)}</strong></span>
-            </span>
-            <span class="year-tag">${fmtPct(yld)} gross return</span>
-          </summary>
-
-          <div class="tbl-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Month</th>
-                  <th>End Balance (pre-tax)</th>
-                  <th>Profit vs Year Start</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${r.months.map(m => `
-                  <tr>
-                    <td>Month ${m.month}</td>
-                    <td>${fmt.format(m.endBalance)}</td>
-                    <td>${fmt.format(m.profitVsStart)}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="tbl-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Year Start</th>
-                  <th>Year End (pre-tax)</th>
-                  <th>Profit (pre-tax)</th>
-                  <th>Taxes (${(+taxPct).toFixed(2)}%)</th>
-                  <th>Post-Tax Balance (before salary)</th>
-                  <th>Salary Paid</th>
-                  <th>Year End (carryover)</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>${fmt.format(r.start)}</td>
-                  <td>${fmt.format(r.grossEnd)}</td>
-                  <td>${fmt.format(r.profitBeforeTax)}</td>
-                  <td>${fmt.format(r.taxes)}</td>
-                  <td>${fmt.format(r.postTaxBeforeSalary)}</td>
-                  <td>${fmt.format(r.salaryPaid)}</td>
-                  <td><strong>${fmt.format(r.endAfterSalary)}</strong></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </details>
-      `;
-
-      const container = document.createElement('div');
-      container.className = 'card';
-      container.innerHTML = yearHTML;
-      yearBlocks.appendChild(container);
+    // Table rows
+    const html = [];
+    let lastYear = 0;
+    rows.forEach(r=>{
+      if(r.year !== lastYear){
+        html.push(`<tr class="year-header"><td colspan="8">Year ${r.year} — Start ${fmtUSD(r.yearStart)}</td></tr>`);
+        lastYear = r.year;
+      }
+      const isYear = r.type==='year';
+      html.push(`
+        <tr class="${isYear?'total-row':''}">
+          <td>${r.year}</td>
+          <td>${r.period}</td>
+          <td class="right">${r.days}</td>
+          <td class="right">${fmtUSD(r.yearStart)}</td>
+          <td class="right">${fmtUSD(r.end)}</td>
+          <td class="right ${isYear ? 'good' : ''}">${fmtUSD(r.profitVsStart)}</td>
+          <td class="right">${isYear?fmtUSD(r.taxes):'—'}</td>
+          <td class="right">${isYear?fmtUSD(r.salary):'—'}</td>
+        </tr>
+      `);
     });
+    els.tbody.innerHTML = html.join('');
   }
 
-  // Utils
-  function toNum(v, d=NaN){ const n = parseFloat(String(v||'').trim()); return isNaN(n)?d:n; }
-  function clamp(n, a, b){ return Math.min(Math.max(n, a), b); }
-  function clampMin(n, a){ return Math.max(n, a); }
-  function sum(arr){ return arr.reduce((s,x)=>s+(+x||0),0); }
+  function getInputs(){
+    const initial = Number(els.initial.value);
+    const tpPct = Number(els.tp.value);
+    const years = Number(els.years.value);
+    const daysPerYear = Number(els.days.value || 240);
+    const taxPct = els.tax.value==='' ? 30 : Number(els.tax.value);
+    const salary = els.salary.value==='' ? 0 : Number(els.salary.value);
+
+    const errors = [];
+    if(!(initial > 0)) errors.push('Initial contribution must be greater than 0.');
+    if(!(tpPct >= 0)) errors.push('Daily TP % must be 0 or more.');
+    if(!(years >= 1 && Number.isInteger(years))) errors.push('Years must be a whole number ≥ 1.');
+    if(!(daysPerYear >= 1 && Number.isInteger(daysPerYear))) errors.push('Trading days per year must be a whole number ≥ 1.');
+    if(!(taxPct >= 0 && taxPct <= 100)) errors.push('Taxes must be between 0 and 100%.');
+    if(!(salary >= 0)) errors.push('Salary can’t be negative.');
+
+    return {initial, tpPct, years, daysPerYear, taxPct, salary, errors};
+  }
+
+  function calculateAndRender(){
+    const {initial, tpPct, years, daysPerYear, taxPct, salary, errors} = getInputs();
+    if(errors.length){
+      alert(errors.join('\n'));
+      return;
+    }
+    const result = calcPlan({initial, tpPct, years, daysPerYear, taxPct, salary});
+    render(result);
+  }
+
+  // Prefill with a clean slate
+  function setDefaults(){
+    els.initial.value = '';
+    els.tp.value = '';
+    els.years.value = '';
+    els.days.value = 240;
+    els.tax.value = 30;
+    els.salary.value = 0;
+    // Clear outputs
+    render({rows:[], finalBalance:0, totalTaxes:0, totalSalary:0, chips:[]});
+    els.chips.innerHTML = '';
+  }
+
+  // Example from your prompt
+  function loadExample(){
+    els.initial.value = 25000;
+    els.tp.value = 0.5;
+    els.years.value = 1;
+    els.days.value = 240;
+    els.tax.value = 30;
+    els.salary.value = 18000;
+    calculateAndRender();
+  }
+
+  // Wire up
+  els.calcBtn.addEventListener('click', calculateAndRender);
+  els.exampleBtn.addEventListener('click', loadExample);
+  els.resetBtn.addEventListener('click', setDefaults);
+
+  // Auto-calc on input changes (debounced)
+  let t;
+  document.querySelectorAll('#form input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      clearTimeout(t);
+      t = setTimeout(()=>{ // gentle debounce for mobile typing
+        if(els.initial.value && els.tp.value && els.years.value){
+          calculateAndRender();
+        }
+      }, 220);
+    });
+  });
+
+  // First render (blank)
+  setDefaults();
 })();
 </script>
 </body>
