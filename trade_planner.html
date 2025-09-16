@@ -1,624 +1,472 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Trade Planner — R:R, TP & Stop</title>
-<style>
-  :root{
-    --bg:#0b0f14;
-    --panel:#111722;
-    --panel-2:#0f1520;
-    --muted:#9fb0c3;
-    --text:#e6edf3;
-    --accent:#01c38d;
-    --accent-2:#2ea0ff;
-    --danger:#ff6b6b;
-    --warning:#f5c542;
-    --good:#32d296;
-    --border:#223045;
-    --hi:#17334d;
-    --shadow:0 10px 30px rgba(0,0,0,.35);
-    --radius:14px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    background: radial-gradient(1200px 600px at 80% -200px, rgba(46,160,255,.08), transparent 60%) ,
-                radial-gradient(900px 500px at -200px 0, rgba(1,195,141,.08), transparent 60%),
-                var(--bg);
-    color:var(--text);
-    font: 15px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-  }
-  .app{
-    max-width:1000px; margin:24px auto; padding:0 14px;
-  }
-  header{
-    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;
-  }
-  .brand{
-    display:flex; align-items:center; gap:12px;
-  }
-  .logo{
-    width:40px; height:40px; border-radius:10px;
-    background: conic-gradient(from 200deg, var(--accent), var(--accent-2));
-    box-shadow:0 10px 30px rgba(46,160,255,.25); position:relative; overflow:hidden;
-  }
-  .logo::after{
-    content:""; position:absolute; inset:6px; border-radius:8px; background:var(--panel-2);
-  }
-  h1{font-size:18px; margin:0}
-  .sub{color:var(--muted); font-size:12px}
-  .card{
-    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent 30%) , var(--panel);
-    border:1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-  }
-  .pad{padding:16px}
-  .row{
-    display:grid; gap:12px;
-    grid-template-columns: repeat(12, 1fr);
-  }
-  .row.stack > *{grid-column: span 12;}
-  @media(min-width:720px){
-    .row.inputs > *{grid-column: span 6;}
-    .row.split3 > *{grid-column: span 4;}
-    .row.sizes > *{grid-column: span 6;}
-  }
-  label{display:block; color:var(--muted); font-size:12px; margin:0 0 6px}
-  .field{
-    display:flex; align-items:center; gap:8px; background:var(--panel-2);
-    border:1px solid var(--border); border-radius:10px; padding:10px 12px;
-  }
-  input[type="number"], input[type="text"]{
-    width:100%; background:transparent; border:0; outline:0; color:var(--text);
-    font-size:15px;
-  }
-  .unit{color:var(--muted); font-weight:600}
-  .toggle, .seg{
-    display:inline-flex; background:var(--panel-2); border:1px solid var(--border); border-radius:10px; padding:4px;
-  }
-  .toggle button, .seg button{
-    border:0; background:transparent; color:var(--muted); padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600;
-  }
-  .toggle button.active, .seg button.active{
-    color:var(--text); background:var(--hi); box-shadow: inset 0 0 0 1px rgba(46,160,255,.25);
-  }
-  .actions{display:flex; gap:10px; flex-wrap:wrap}
-  .btn{
-    background: var(--accent); color:#05251c; font-weight:800; border:0; border-radius:10px; padding:12px 14px; cursor:pointer;
-  }
-  .btn.secondary{ background:transparent; color:var(--text); border:1px solid var(--border); }
-  .grid{
-    display:grid; gap:12px; grid-template-columns: repeat(12, 1fr); align-items:stretch;
-  }
-  .grid > *{grid-column: span 12;}
-  @media(min-width:820px){
-    .grid > .left{grid-column: span 5;}
-    .grid > .right{grid-column: span 7;}
-  }
-  .kpis{
-    display:grid; gap:10px; grid-template-columns: repeat(2, 1fr);
-  }
-  .kpi{
-    background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:12px;
-  }
-  .kpi .label{color:var(--muted); font-size:12px}
-  .kpi .value{font-size:20px; font-weight:800; margin-top:6px}
-  .kpi.good .value{color:var(--good)}
-  .kpi.warn .value{color:var(--warning)}
-  .kpi.bad .value{color:var(--danger)}
-  details{
-    border-top:1px dashed var(--border); padding-top:12px; margin-top:10px;
-  }
-  details > summary{
-    list-style:none; cursor:pointer; color:var(--muted); font-weight:700;
-  }
-  details > summary::-webkit-details-marker{display:none}
-  table{
-    width:100%; border-collapse:separate; border-spacing:0; overflow:auto; border-radius:12px; background:var(--panel-2); border:1px solid var(--border);
-  }
-  thead th{
-    position:sticky; top:0; background:linear-gradient(180deg, rgba(255,255,255,.02), transparent 50%), var(--panel-2);
-    color:var(--muted); font-weight:700; font-size:12px; text-align:right; padding:10px 12px; border-bottom:1px solid var(--border);
-  }
-  thead th:first-child, tbody td:first-child{text-align:left}
-  tbody td{
-    padding:10px 12px; text-align:right; border-bottom:1px solid rgba(255,255,255,.04); color:var(--text);
-  }
-  tbody tr:last-child td{border-bottom:0}
-  .row-selected{
-    background: linear-gradient(180deg, rgba(46,160,255,.08), rgba(1,195,141,.08));
-    outline:1px solid rgba(46,160,255,.35);
-  }
-  .pill{
-    display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:.02em;
-    color:#072b1f; background:var(--accent); border:1px solid rgba(255,255,255,.15);
-  }
-  .muted{color:var(--muted)}
-  .footer-note{color:var(--muted); font-size:12px; margin:10px 0 0}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Order Calculator</title>
+    <style>
+        :root {
+            --primary: #2962ff;
+            --primary-dark: #0039cb;
+            --secondary: #455a64;
+            --success: #00c853;
+            --danger: #ff1744;
+            --background: #121212;
+            --surface: #1e1e1e;
+            --on-surface: #ffffff;
+            --on-surface-secondary: #b0b0b0;
+            --border: #333333;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--on-surface);
+            padding: 16px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: var(--surface);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .card {
+            background-color: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--on-surface-secondary);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background-color: #2a2a2a;
+            color: var(--on-surface);
+            font-size: 16px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .toggle-group {
+            display: flex;
+            margin-bottom: 16px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .toggle-option {
+            flex: 1;
+            text-align: center;
+            padding: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .toggle-option.active {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .results {
+            margin-top: 24px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--on-surface-secondary);
+        }
+
+        .result-value {
+            font-weight: 600;
+        }
+
+        .profit {
+            color: var(--success);
+        }
+
+        .loss {
+            color: var(--danger);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--on-surface-secondary);
+            font-weight: 500;
+        }
+
+        tr.highlight {
+            background-color: rgba(41, 98, 255, 0.15);
+            border-left: 3px solid var(--primary);
+        }
+
+        .settings-toggle {
+            text-align: center;
+            margin: 16px 0;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .settings-panel {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .settings-panel.open {
+            max-height: 500px;
+        }
+
+        @media (max-width: 480px) {
+            input, select, .toggle-option {
+                padding: 12px;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="brand">
-        <div class="logo"></div>
-        <div>
-          <h1>Trade Planner</h1>
-          <div class="sub">Entry → Target → Stop, sized by USD or shares</div>
-        </div>
-      </div>
-      <div class="seg" role="tablist" aria-label="Position side">
-        <button id="sideLong" class="active" aria-pressed="true">Long</button>
-        <button id="sideShort" aria-pressed="false">Short</button>
-      </div>
-    </header>
+    <div class="container">
+        <header>
+            <h1>Trading Order Calculator</h1>
+            <p>Calculate your profit targets and stop losses</p>
+        </header>
 
-    <div class="card pad">
-      <div class="row inputs stack">
-        <!-- 1) Entry price -->
-        <div>
-          <label for="entry">Entry price (A) <span class="pill">Required</span></label>
-          <div class="field">
-            <span class="unit">$</span>
-            <input id="entry" type="number" inputmode="decimal" step="0.01" min="0" placeholder="e.g., 232.00" required>
-          </div>
-        </div>
-
-        <!-- 2) Take profit target -->
-        <div>
-          <label>Take profit target (B) <span class="pill">Required</span></label>
-          <div class="actions" style="margin-bottom:8px">
-            <div class="toggle" aria-label="TP input mode">
-              <button id="tpModePct" class="active" aria-pressed="true">Percent</button>
-              <button id="tpModePx" aria-pressed="false">Price</button>
+        <div class="card">
+            <div class="form-group">
+                <label for="entryPrice">Entry Price (A)</label>
+                <input type="number" id="entryPrice" placeholder="Enter entry price" step="0.0001" required>
             </div>
-          </div>
-          <div id="tpPctWrap" class="field">
-            <input id="tpPct" type="number" inputmode="decimal" step="0.01" placeholder="e.g., 1 (means 1%)">
-            <span class="unit">%</span>
-          </div>
-          <div id="tpPxWrap" class="field" style="display:none">
-            <span class="unit">$</span>
-            <input id="tpPx" type="number" inputmode="decimal" step="0.01" placeholder="e.g., 234.32">
-          </div>
+
+            <div class="form-group">
+                <label for="takeProfitInput">Take Profit (B)</label>
+                <div class="toggle-group">
+                    <div class="toggle-option active" id="togglePercentage">Percentage</div>
+                    <div class="toggle-option" id="togglePrice">Price</div>
+                </div>
+                <input type="number" id="takeProfitInput" placeholder="Enter take profit percentage" step="0.01" required>
+            </div>
+
+            <div class="form-group">
+                <label for="riskReward">R:R Ratio (C) <span style="color: var(--on-surface-secondary); font-weight: normal;">(optional)</span></label>
+                <input type="text" id="riskReward" placeholder="e.g., 1:3" value="1:3">
+            </div>
+
+            <div class="form-group">
+                <label for="entryAmount">Entry Amount (D) <span style="color: var(--on-surface-secondary); font-weight: normal;">(optional)</span></label>
+                <div class="toggle-group">
+                    <div class="toggle-option active" id="toggleUSD">USD</div>
+                    <div class="toggle-option" id="toggleShares">Shares</div>
+                </div>
+                <input type="number" id="entryAmount" placeholder="Enter amount" step="0.01">
+            </div>
         </div>
 
-        <!-- 3) Risk:Reward -->
-        <div>
-          <label>Risk : Reward (C) <span class="muted">(optional, default 1 : 3)</span></label>
-          <div class="row split3">
-            <div class="field">
-              <span class="unit">Risk</span>
-              <input id="rrRisk" type="number" inputmode="decimal" step="0.1" min="0.0001" value="1">
-            </div>
-            <div class="field">
-              <span class="unit">Reward</span>
-              <input id="rrReward" type="number" inputmode="decimal" step="0.1" min="0.0001" value="3">
-            </div>
-            <div class="field">
-              <span class="unit">R multiple</span>
-              <input id="rrDisplay" type="text" value="1:3 ⇒ 3.00R" readonly>
-            </div>
-          </div>
+        <div class="settings-toggle" id="settingsToggle">
+            Show Settings &#9660;
         </div>
 
-        <!-- 4) Position sizing (optional) -->
-        <div>
-          <label>Entry amount (D) <span class="muted">(optional)</span></label>
-          <div class="actions" style="margin-bottom:8px">
-            <div class="toggle" aria-label="Amount type">
-              <button id="amtUsd" class="active" aria-pressed="true">Amount in USD</button>
-              <button id="amtShares" aria-pressed="false">Share count</button>
+        <div class="card settings-panel" id="settingsPanel">
+            <div class="form-group">
+                <label for="percentages">Alternate Percentage Values</label>
+                <input type="text" id="percentages" placeholder="Comma-separated values" value="0.5,1,1.5,2,2.5,3">
             </div>
-          </div>
-          <div id="amtUsdWrap" class="field">
-            <span class="unit">$</span>
-            <input id="amountUsd" type="number" inputmode="decimal" step="0.01" placeholder="e.g., 1000.00">
-          </div>
-          <div id="amtSharesWrap" class="field" style="display:none">
-            <input id="amountShares" type="number" inputmode="decimal" step="0.000001" placeholder="e.g., 50">
-            <span class="unit">sh</span>
-          </div>
         </div>
-      </div>
 
-      <details>
-        <summary>Advanced settings</summary>
-        <div class="row sizes">
-          <div>
-            <label>Suggestion levels (%) <span class="muted">(comma separated)</span></label>
-            <div class="field">
-              <input id="levels" type="text" value="0.5,1,1.5,2,2.5,3">
+        <div class="card results">
+            <h2>Calculation Results</h2>
+            <div class="result-item">
+                <span class="result-label">Take Profit Price:</span>
+                <span class="result-value" id="takeProfitPrice">-</span>
             </div>
-          </div>
-          <div>
-            <label>Price precision (decimals)</label>
-            <div class="field">
-              <input id="precision" type="number" min="0" max="6" step="1" value="2">
+            <div class="result-item">
+                <span class="result-label">Stop Price:</span>
+                <span class="result-value" id="stopPrice">-</span>
             </div>
-          </div>
+            <div class="result-item">
+                <span class="result-label">Profit per Share:</span>
+                <span class="result-value profit" id="profitPerShare">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Risk per Share:</span>
+                <span class="result-value loss" id="riskPerShare">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Total Profit:</span>
+                <span class="result-value profit" id="totalProfit">-</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Total Risk:</span>
+                <span class="result-value loss" id="totalRisk">-</span>
+            </div>
         </div>
-      </details>
 
-      <div class="actions" style="margin-top:12px">
-        <button class="btn" id="calcBtn">Calculate</button>
-        <button class="btn secondary" id="resetBtn">Reset</button>
-      </div>
+        <div class="card">
+            <h2>Alternate Scenarios</h2>
+            <table id="scenariosTable">
+                <thead>
+                    <tr>
+                        <th>Take Profit %</th>
+                        <th>Take Profit Price</th>
+                        <th>Stop Price</th>
+                        <th>Profit/Share</th>
+                        <th>Risk/Share</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="grid" style="margin-top:16px">
-      <div class="left card pad">
-        <h3 style="margin:0 0 10px">Your setup</h3>
-        <div class="kpis">
-          <div class="kpi">
-            <div class="label">Take Profit</div>
-            <div class="value" id="kpiTP">$—</div>
-            <div class="muted" id="kpiTPpct">—</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Stop Price</div>
-            <div class="value" id="kpiSL">$—</div>
-            <div class="muted" id="kpiRmult">—</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Profit / Share</div>
-            <div class="value good" id="kpiPPS">$—</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Risk / Share</div>
-            <div class="value bad" id="kpiRPS">$—</div>
-          </div>
-        </div>
-        <div id="totalsWrap" style="margin-top:10px; display:none">
-          <div class="kpis">
-            <div class="kpi">
-              <div class="label">Shares</div>
-              <div class="value" id="kpiShares">—</div>
-            </div>
-            <div class="kpi">
-              <div class="label">Total Profit @ TP</div>
-              <div class="value good" id="kpiTotProfit">$—</div>
-            </div>
-            <div class="kpi">
-              <div class="label">Total Risk @ Stop</div>
-              <div class="value bad" id="kpiTotRisk">$—</div>
-            </div>
-          </div>
-        </div>
-        <p class="footer-note">
-          Example: A=232, B=1% (Long) ⇒ TP = 234.32. Stop is computed from your Risk:Reward.
-        </p>
-      </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const entryPriceInput = document.getElementById('entryPrice');
+            const takeProfitInput = document.getElementById('takeProfitInput');
+            const riskRewardInput = document.getElementById('riskReward');
+            const entryAmountInput = document.getElementById('entryAmount');
+            const percentagesInput = document.getElementById('percentages');
+            
+            const togglePercentage = document.getElementById('togglePercentage');
+            const togglePrice = document.getElementById('togglePrice');
+            const toggleUSD = document.getElementById('toggleUSD');
+            const toggleShares = document.getElementById('toggleShares');
+            const settingsToggle = document.getElementById('settingsToggle');
+            const settingsPanel = document.getElementById('settingsPanel');
+            
+            const takeProfitPriceEl = document.getElementById('takeProfitPrice');
+            const stopPriceEl = document.getElementById('stopPrice');
+            const profitPerShareEl = document.getElementById('profitPerShare');
+            const riskPerShareEl = document.getElementById('riskPerShare');
+            const totalProfitEl = document.getElementById('totalProfit');
+            const totalRiskEl = document.getElementById('totalRisk');
+            const scenariosTable = document.getElementById('scenariosTable').querySelector('tbody');
 
-      <div class="right card pad">
-        <h3 style="margin:0 0 10px">Suggestions</h3>
-        <div style="overflow:auto">
-          <table id="table">
-            <thead>
-              <tr>
-                <th>% Move</th>
-                <th>TP Price</th>
-                <th>Stop</th>
-                <th>Profit/Sh</th>
-                <th>Risk/Sh</th>
-                <th>Shares</th>
-                <th>Total Profit</th>
-                <th>Total Risk</th>
-                <th>R Multiple</th>
-              </tr>
-            </thead>
-            <tbody id="tbody">
-              <tr><td colspan="9" class="muted" style="text-align:center;padding:24px">Enter values above and press <b>Calculate</b>.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+            // State
+            let isPercentageMode = true;
+            let isUSDMode = true;
 
-    <p class="footer-note">
-      Notes: For <b>Long</b>, positive % raises TP; for <b>Short</b>, positive % lowers TP. Stop is derived to match your Risk:Reward (<i>risk : reward</i>). Fractional shares supported.
-      This tool is for planning; always double-check with your broker.
-    </p>
-  </div>
+            // Event Listeners
+            entryPriceInput.addEventListener('input', calculate);
+            takeProfitInput.addEventListener('input', calculate);
+            riskRewardInput.addEventListener('input', calculate);
+            entryAmountInput.addEventListener('input', calculate);
+            percentagesInput.addEventListener('input', calculate);
 
-<script>
-(function(){
-  // --- Elements
-  const sideLong = document.getElementById('sideLong');
-  const sideShort = document.getElementById('sideShort');
-  const entry = document.getElementById('entry');
-  const tpModePct = document.getElementById('tpModePct');
-  const tpModePx = document.getElementById('tpModePx');
-  const tpPctWrap = document.getElementById('tpPctWrap');
-  const tpPxWrap = document.getElementById('tpPxWrap');
-  const tpPct = document.getElementById('tpPct');
-  const tpPx = document.getElementById('tpPx');
-  const rrRisk = document.getElementById('rrRisk');
-  const rrReward = document.getElementById('rrReward');
-  const rrDisplay = document.getElementById('rrDisplay');
-  const amtUsd = document.getElementById('amtUsd');
-  const amtShares = document.getElementById('amtShares');
-  const amtUsdWrap = document.getElementById('amtUsdWrap');
-  const amtSharesWrap = document.getElementById('amtSharesWrap');
-  const amountUsd = document.getElementById('amountUsd');
-  const amountShares = document.getElementById('amountShares');
-  const levels = document.getElementById('levels');
-  const precision = document.getElementById('precision');
+            togglePercentage.addEventListener('click', () => {
+                togglePercentage.classList.add('active');
+                togglePrice.classList.remove('active');
+                isPercentageMode = true;
+                takeProfitInput.placeholder = 'Enter take profit percentage';
+                takeProfitInput.step = '0.01';
+                calculate();
+            });
 
-  const calcBtn = document.getElementById('calcBtn');
-  const resetBtn = document.getElementById('resetBtn');
+            togglePrice.addEventListener('click', () => {
+                togglePrice.classList.add('active');
+                togglePercentage.classList.remove('active');
+                isPercentageMode = false;
+                takeProfitInput.placeholder = 'Enter take profit price';
+                takeProfitInput.step = '0.0001';
+                calculate();
+            });
 
-  const kpiTP = document.getElementById('kpiTP');
-  const kpiTPpct = document.getElementById('kpiTPpct');
-  const kpiSL = document.getElementById('kpiSL');
-  const kpiRmult = document.getElementById('kpiRmult');
-  const kpiPPS = document.getElementById('kpiPPS');
-  const kpiRPS = document.getElementById('kpiRPS');
-  const kpiShares = document.getElementById('kpiShares');
-  const kpiTotProfit = document.getElementById('kpiTotProfit');
-  const kpiTotRisk = document.getElementById('kpiTotRisk');
-  const totalsWrap = document.getElementById('totalsWrap');
+            toggleUSD.addEventListener('click', () => {
+                toggleUSD.classList.add('active');
+                toggleShares.classList.remove('active');
+                isUSDMode = true;
+                calculate();
+            });
 
-  const tbody = document.getElementById('tbody');
+            toggleShares.addEventListener('click', () => {
+                toggleShares.classList.add('active');
+                toggleUSD.classList.remove('active');
+                isUSDMode = false;
+                calculate();
+            });
 
-  // --- State
-  let side = 'long'; // 'long' | 'short'
-  let tpMode = 'pct'; // 'pct' | 'px'
-  let amtMode = 'usd'; // 'usd' | 'shares'
+            settingsToggle.addEventListener('click', () => {
+                settingsPanel.classList.toggle('open');
+                settingsToggle.innerHTML = settingsPanel.classList.contains('open') ? 
+                    'Hide Settings &#9650;' : 'Show Settings &#9660;';
+            });
 
-  // --- Helpers
-  const clampPrec = (n) => Math.max(0, Math.min(6, (parseInt(n,10)||0)));
-  const fmtN = (v, p=2) => isFinite(v) ? Number(v).toFixed(p) : '—';
-  const fmtMoney = (v, p=2) => (isFinite(v) ? ('$' + Number(v).toFixed(p)) : '—');
-  const parseNum = (el) => {
-    const v = (typeof el === 'string') ? el : el.value;
-    const n = parseFloat((v||'').toString().replace(/,/g,'').trim());
-    return isFinite(n) ? n : null;
-  };
-  const rrMultiple = () => {
-    const riskPart = parseNum(rrRisk) ?? 1;
-    const rewardPart = parseNum(rrReward) ?? 3;
-    const R = rewardPart / Math.max(1e-9, riskPart);
-    rrDisplay.value = `${fmtN(riskPart,2).replace(/\.00$/,'')}:${fmtN(rewardPart,2).replace(/\.00$/,'')} ⇒ ${fmtN(R,2)}R`;
-    return R;
-  };
+            // Calculation functions
+            function calculate() {
+                const entryPrice = parseFloat(entryPriceInput.value);
+                if (!entryPrice || entryPrice <= 0) return;
 
-  function computeTP(entryPx, tpValue, mode, side) {
-    if (mode === 'pct') {
-      const pct = tpValue / 100;
-      if (side === 'long') return entryPx * (1 + pct);
-      else return entryPx * (1 - pct);
-    } else {
-      return tpValue;
-    }
-  }
+                const takeProfitValue = parseFloat(takeProfitInput.value);
+                if (!takeProfitValue) return;
 
-  function computeStop(entryPx, tpPx, R, side) {
-    // Ensure positive reward/risk multiple
-    const Rpos = Math.max(1e-9, R);
-    if (side === 'long') {
-      const reward = tpPx - entryPx; // >0 expected
-      const risk = reward / Rpos;
-      return entryPx - risk;
-    } else {
-      const reward = entryPx - tpPx; // >0 expected
-      const risk = reward / Rpos;
-      return entryPx + risk;
-    }
-  }
+                // Calculate take profit price
+                let takeProfitPrice;
+                if (isPercentageMode) {
+                    takeProfitPrice = entryPrice * (1 + takeProfitValue / 100);
+                } else {
+                    takeProfitPrice = takeProfitValue;
+                }
 
-  function profitPerShare(entryPx, tpPx, side){
-    return side === 'long' ? (tpPx - entryPx) : (entryPx - tpPx);
-  }
-  function riskPerShare(entryPx, stopPx, side){
-    return side === 'long' ? (entryPx - stopPx) : (stopPx - entryPx);
-  }
+                // Calculate R:R ratio
+                let riskRewardRatio = 3; // Default to 1:3
+                if (riskRewardInput.value) {
+                    const parts = riskRewardInput.value.split(':');
+                    if (parts.length === 2) {
+                        riskRewardRatio = parseFloat(parts[1]) / parseFloat(parts[0]);
+                    }
+                }
 
-  function sharesFromAmount(entryPx){
-    if (amtMode === 'usd') {
-      const usd = parseNum(amountUsd);
-      if (usd == null || !entryPx) return null;
-      return usd / entryPx;
-    } else {
-      const sh = parseNum(amountShares);
-      return (sh==null) ? null : sh;
-    }
-  }
+                // Calculate stop price
+                const profitPerShare = takeProfitPrice - entryPrice;
+                const riskPerShare = Math.abs(profitPerShare / riskRewardRatio);
+                const stopPrice = profitPerShare >= 0 ? 
+                    entryPrice - riskPerShare : 
+                    entryPrice + riskPerShare;
 
-  function buildTable(entryPx, R, levelsArr, sh, prec, userTP){
-    tbody.innerHTML = '';
-    const tol = Math.max(0.005, entryPx * 0.0005); // tolerance to highlight (~5 bps or 0.5c)
-    let matched = false;
+                // Update results
+                takeProfitPriceEl.textContent = takeProfitPrice.toFixed(4);
+                stopPriceEl.textContent = stopPrice.toFixed(4);
+                profitPerShareEl.textContent = profitPerShare.toFixed(4);
+                riskPerShareEl.textContent = riskPerShare.toFixed(4);
 
-    levelsArr.forEach((lv)=>{
-      const pct = lv;
-      const tp = computeTP(entryPx, pct, 'pct', side);
-      if (!isFinite(tp) || tp<=0) return;
+                // Calculate totals if amount is provided
+                const entryAmount = parseFloat(entryAmountInput.value);
+                if (entryAmount && entryAmount > 0) {
+                    if (isUSDMode) {
+                        const shares = entryAmount / entryPrice;
+                        totalProfitEl.textContent = (profitPerShare * shares).toFixed(2);
+                        totalRiskEl.textContent = (riskPerShare * shares).toFixed(2);
+                    } else {
+                        totalProfitEl.textContent = (profitPerShare * entryAmount).toFixed(2);
+                        totalRiskEl.textContent = (riskPerShare * entryAmount).toFixed(2);
+                    }
+                } else {
+                    totalProfitEl.textContent = '-';
+                    totalRiskEl.textContent = '-';
+                }
 
-      const stop = computeStop(entryPx, tp, R, side);
-      const pps = profitPerShare(entryPx, tp, side);
-      const rps = riskPerShare(entryPx, stop, side);
-      const Rach = rps>0 ? (pps/rps) : NaN;
+                // Generate scenarios
+                generateScenarios(entryPrice, riskRewardRatio, entryAmount, isUSDMode);
+            }
 
-      const tr = document.createElement('tr');
-      if (isFinite(userTP) && Math.abs(tp - userTP) <= tol) { tr.classList.add('row-selected'); matched = true; }
+            function generateScenarios(entryPrice, riskRewardRatio, entryAmount, isUSD) {
+                // Get percentages from input or use defaults
+                let percentages;
+                try {
+                    percentages = percentagesInput.value.split(',').map(p => parseFloat(p.trim()));
+                } catch (e) {
+                    percentages = [0.5, 1, 1.5, 2, 2.5, 3];
+                }
 
-      const shDisp = (sh!=null) ? fmtN(sh, 6).replace(/0+$/,'').replace(/\.$/,'') : '—';
-      const totP = (sh!=null) ? sh * pps : NaN;
-      const totR = (sh!=null) ? sh * rps : NaN;
+                // Clear table
+                scenariosTable.innerHTML = '';
 
-      tr.innerHTML = `
-        <td>${fmtN(pct,2)}%</td>
-        <td>${fmtMoney(tp, prec)}</td>
-        <td>${fmtMoney(stop, prec)}</td>
-        <td>${fmtMoney(pps, prec)}</td>
-        <td>${fmtMoney(rps, prec)}</td>
-        <td>${sh!=null ? shDisp : '—'}</td>
-        <td>${(sh!=null) ? fmtMoney(totP, 2) : '—'}</td>
-        <td>${(sh!=null) ? fmtMoney(totR, 2) : '—'}</td>
-        <td>${isFinite(Rach)? fmtN(Rach,2)+'R' : '—'}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+                // Get current take profit percentage for highlighting
+                const currentTakeProfit = isPercentageMode ? 
+                    parseFloat(takeProfitInput.value) : 
+                    ((parseFloat(takeProfitInput.value) - entryPrice) / entryPrice) * 100;
 
-    // If user's TP isn't in the list, append a highlighted row at the end
-    if (isFinite(userTP) && !matched) {
-      const pctImplied = side==='long' ? ((userTP/entryPx-1)*100) : ((1 - userTP/entryPx)*100);
-      const stop = computeStop(entryPx, userTP, R, side);
-      const pps = profitPerShare(entryPx, userTP, side);
-      const rps = riskPerShare(entryPx, stop, side);
-      const Rach = rps>0 ? (pps/rps) : NaN;
+                // Add rows for each percentage
+                percentages.forEach(p => {
+                    const takeProfitPrice = entryPrice * (1 + p / 100);
+                    const profitPerShare = takeProfitPrice - entryPrice;
+                    const riskPerShare = Math.abs(profitPerShare / riskRewardRatio);
+                    const stopPrice = profitPerShare >= 0 ? 
+                        entryPrice - riskPerShare : 
+                        entryPrice + riskPerShare;
 
-      const tr = document.createElement('tr');
-      tr.classList.add('row-selected');
-      tr.innerHTML = `
-        <td>${fmtN(pctImplied,2)}% <span class="pill">Your TP</span></td>
-        <td>${fmtMoney(userTP, prec)}</td>
-        <td>${fmtMoney(stop, prec)}</td>
-        <td>${fmtMoney(pps, prec)}</td>
-        <td>${fmtMoney(rps, prec)}</td>
-        <td>${(sh!=null) ? (fmtN(sh,6).replace(/0+$/,'').replace(/\.$/,'')) : '—'}</td>
-        <td>${(sh!=null) ? fmtMoney(sh*pps,2) : '—'}</td>
-        <td>${(sh!=null) ? fmtMoney(sh*rps,2) : '—'}</td>
-        <td>${isFinite(Rach)? fmtN(Rach,2)+'R' : '—'}</td>
-      `;
-      tbody.appendChild(tr);
-    }
-  }
+                    const row = document.createElement('tr');
+                    
+                    // Highlight if this is the current percentage (with some tolerance for floating point)
+                    if (Math.abs(p - currentTakeProfit) < 0.1) {
+                        row.classList.add('highlight');
+                    }
 
-  function updateKPIs(entryPx, tpPx, stopPx, R, sh, prec){
-    const pps = profitPerShare(entryPx, tpPx, side);
-    const rps = riskPerShare(entryPx, stopPx, side);
-    const tpPct = side==='long' ? ((tpPx/entryPx - 1)*100) : ((1 - tpPx/entryPx)*100);
+                    row.innerHTML = `
+                        <td>${p}%</td>
+                        <td>${takeProfitPrice.toFixed(4)}</td>
+                        <td>${stopPrice.toFixed(4)}</td>
+                        <td class="profit">${profitPerShare.toFixed(4)}</td>
+                        <td class="loss">${riskPerShare.toFixed(4)}</td>
+                    `;
 
-    kpiTP.textContent = fmtMoney(tpPx, prec);
-    kpiTPpct.textContent = isFinite(tpPct) ? `${fmtN(tpPct,2)}% move` : '—';
-    kpiSL.textContent = fmtMoney(stopPx, prec);
-    kpiRmult.textContent = `${fmtN(R,2)}R target`;
-    kpiPPS.textContent = fmtMoney(pps, prec);
-    kpiRPS.textContent = fmtMoney(rps, prec);
+                    scenariosTable.appendChild(row);
+                });
+            }
 
-    if (sh!=null) {
-      const totP = sh * pps;
-      const totR = sh * rps;
-      kpiShares.textContent = fmtN(sh, 6).replace(/0+$/,'').replace(/\.$/,'');
-      kpiTotProfit.textContent = fmtMoney(totP, 2);
-      kpiTotRisk.textContent = fmtMoney(totR, 2);
-      totalsWrap.style.display = '';
-    } else {
-      totalsWrap.style.display = 'none';
-    }
-  }
-
-  function computeAndRender(){
-    const prec = clampPrec(parseNum(precision) ?? 2);
-    const entryPx = parseNum(entry);
-    if (entryPx == null || entryPx <= 0) {
-      alert('Please enter a valid Entry price.');
-      return;
-    }
-
-    const R = rrMultiple();
-
-    // Determine user's TP
-    let userTP = null;
-    if (tpMode === 'pct') {
-      const pct = parseNum(tpPct);
-      if (pct == null) { alert('Please enter a TP percent.'); return; }
-      userTP = computeTP(entryPx, pct, 'pct', side);
-    } else {
-      const tpx = parseNum(tpPx);
-      if (tpx == null || tpx<=0) { alert('Please enter a TP price.'); return; }
-      userTP = computeTP(entryPx, tpx, 'px', side);
-    }
-
-    const stop = computeStop(entryPx, userTP, R, side);
-    const sh = sharesFromAmount(entryPx);
-
-    updateKPIs(entryPx, userTP, stop, R, sh, prec);
-
-    // Suggestions levels
-    let lvStr = (levels.value || '').trim();
-    if (!lvStr) lvStr = '0.5,1,1.5,2,2.5,3';
-    const arr = lvStr.split(',').map(s=>parseFloat(s.trim())).filter(n=>isFinite(n) && n>=0).slice(0, 24);
-    if (arr.length===0) arr.push(0.5,1,1.5,2,2.5,3);
-
-    buildTable(entryPx, R, arr, sh, prec, userTP);
-  }
-
-  // --- UI bindings
-  sideLong.addEventListener('click', ()=>{
-    side='long';
-    sideLong.classList.add('active'); sideLong.setAttribute('aria-pressed','true');
-    sideShort.classList.remove('active'); sideShort.setAttribute('aria-pressed','false');
-  });
-  sideShort.addEventListener('click', ()=>{
-    side='short';
-    sideShort.classList.add('active'); sideShort.setAttribute('aria-pressed','true');
-    sideLong.classList.remove('active'); sideLong.setAttribute('aria-pressed','false');
-  });
-
-  tpModePct.addEventListener('click', ()=>{
-    tpMode='pct';
-    tpModePct.classList.add('active'); tpModePct.setAttribute('aria-pressed','true');
-    tpModePx.classList.remove('active'); tpModePx.setAttribute('aria-pressed','false');
-    tpPctWrap.style.display='flex'; tpPxWrap.style.display='none';
-  });
-  tpModePx.addEventListener('click', ()=>{
-    tpMode='px';
-    tpModePx.classList.add('active'); tpModePx.setAttribute('aria-pressed','true');
-    tpModePct.classList.remove('active'); tpModePct.setAttribute('aria-pressed','false');
-    tpPctWrap.style.display='none'; tpPxWrap.style.display='flex';
-  });
-
-  amtUsd.addEventListener('click', ()=>{
-    amtMode='usd';
-    amtUsd.classList.add('active'); amtUsd.setAttribute('aria-pressed','true');
-    amtShares.classList.remove('active'); amtShares.setAttribute('aria-pressed','false');
-    amtUsdWrap.style.display='flex'; amtSharesWrap.style.display='none';
-  });
-  amtShares.addEventListener('click', ()=>{
-    amtMode='shares';
-    amtShares.classList.add('active'); amtShares.setAttribute('aria-pressed','true');
-    amtUsd.classList.remove('active'); amtUsd.setAttribute('aria-pressed','false');
-    amtUsdWrap.style.display='none'; amtSharesWrap.style.display='flex';
-  });
-
-  [rrRisk, rrReward].forEach(el=>{
-    el.addEventListener('input', rrMultiple);
-  });
-
-  calcBtn.addEventListener('click', computeAndRender);
-
-  resetBtn.addEventListener('click', ()=>{
-    side='long'; sideLong.click();
-    tpMode='pct'; tpModePct.click();
-    amtMode='usd'; amtUsd.click();
-    entry.value='';
-    tpPct.value='';
-    tpPx.value='';
-    rrRisk.value='1';
-    rrReward.value='3';
-    rrMultiple();
-    amountUsd.value='';
-    amountShares.value='';
-    levels.value='0.5,1,1.5,2,2.5,3';
-    precision.value='2';
-    tbody.innerHTML = '<tr><td colspan="9" class="muted" style="text-align:center;padding:24px">Enter values above and press <b>Calculate</b>.</td></tr>';
-    kpiTP.textContent=kpiSL.textContent=kpiPPS.textContent=kpiRPS.textContent='$—';
-    kpiTPpct.textContent=kpiRmult.textContent='—';
-    totalsWrap.style.display='none';
-  });
-
-  // Pre-wire example from your prompt for a nice first run
-  entry.value = '232';
-  tpPct.value = '1';
-  rrMultiple();
-})();
-</script>
+            // Initialize with default values for demonstration
+            entryPriceInput.value = "232";
+            takeProfitInput.value = "1";
+            calculate();
+        });
+    </script>
 </body>
 </html>
