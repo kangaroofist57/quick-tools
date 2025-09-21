@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,262 +11,260 @@
             box-sizing: border-box;
         }
 
-
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        background: linear-gradient(135deg, #0a0f1c 0%, #1a1f2e 100%);
-        color: #ffffff;
-        min-height: 100vh;
-        padding: 20px;
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .header {
-        text-align: center;
-        margin-bottom: 30px;
-        padding: 20px 0;
-        border-bottom: 1px solid #2a3441;
-    }
-
-    .header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #00d4aa;
-        margin-bottom: 5px;
-    }
-
-    .header p {
-        color: #8892b0;
-        font-size: 1.1rem;
-    }
-
-    .calculator-section {
-        background: rgba(26, 31, 46, 0.8);
-        border-radius: 16px;
-        padding: 30px;
-        margin-bottom: 30px;
-        border: 1px solid #2a3441;
-        backdrop-filter: blur(10px);
-    }
-
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
-        margin-bottom: 25px;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-group label {
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #ccd6f6;
-        font-size: 0.95rem;
-    }
-
-    .required {
-        color: #ff6b6b;
-    }
-
-    .input-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    input[type="number"], input[type="text"], select {
-        background: #1e2530;
-        border: 2px solid #2a3441;
-        border-radius: 8px;
-        padding: 12px 16px;
-        color: #ffffff;
-        font-size: 1rem;
-        width: 100%;
-        transition: all 0.3s ease;
-    }
-
-    input[type="number"]:focus, input[type="text"]:focus, select:focus {
-        outline: none;
-        border-color: #00d4aa;
-        box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
-    }
-
-    .toggle-btn {
-        background: #364155;
-        border: none;
-        color: #ccd6f6;
-        padding: 8px 12px;
-        margin-left: 8px;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        white-space: nowrap;
-        font-size: 0.9rem;
-    }
-
-    .toggle-btn:hover {
-        background: #00d4aa;
-        color: #0a0f1c;
-    }
-
-    .toggle-btn.active {
-        background: #00d4aa;
-        color: #0a0f1c;
-    }
-
-    .checkbox-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .checkbox-group input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        accent-color: #00d4aa;
-    }
-
-    .results-section {
-        background: rgba(26, 31, 46, 0.8);
-        border-radius: 16px;
-        padding: 30px;
-        border: 1px solid #2a3441;
-        backdrop-filter: blur(10px);
-    }
-
-    .results-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-
-    .result-card {
-        background: #1e2530;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        border: 1px solid #2a3441;
-    }
-
-    .result-card h3 {
-        color: #8892b0;
-        font-size: 0.9rem;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .result-card .value {
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #00d4aa;
-    }
-
-    .profit {
-        color: #00d4aa;
-    }
-
-    .loss {
-        color: #ff6b6b;
-    }
-
-    .scenarios-table {
-        overflow-x: auto;
-        background: #1e2530;
-        border-radius: 12px;
-        border: 1px solid #2a3441;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        padding: 15px;
-        text-align: center;
-        border-bottom: 1px solid #2a3441;
-    }
-
-    th {
-        background: #252c3a;
-        color: #ccd6f6;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        letter-spacing: 0.5px;
-    }
-
-    td {
-        color: #ffffff;
-    }
-
-    .highlight {
-        background: rgba(0, 212, 170, 0.1);
-        border-left: 3px solid #00d4aa;
-    }
-
-    .config-section {
-        margin-bottom: 20px;
-        padding: 20px;
-        background: rgba(30, 37, 48, 0.5);
-        border-radius: 12px;
-        border: 1px solid #2a3441;
-    }
-
-    .config-section h3 {
-        color: #ccd6f6;
-        margin-bottom: 15px;
-        font-size: 1.1rem;
-    }
-
-    .config-input {
-        width: 100%;
-        max-width: 500px;
-    }
-
-    @media (max-width: 768px) {
-        .header h1 {
-            font-size: 2rem;
-        }
-        
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .results-grid {
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        }
-        
-        .calculator-section, .results-section {
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a0f1c 0%, #1a1f2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
             padding: 20px;
         }
-        
-        th, td {
-            padding: 10px 8px;
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 1px solid #2a3441;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #00d4aa;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #8892b0;
+            font-size: 1.1rem;
+        }
+
+        .calculator-section {
+            background: rgba(26, 31, 46, 0.8);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #2a3441;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ccd6f6;
+            font-size: 0.95rem;
+        }
+
+        .required {
+            color: #ff6b6b;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="number"], input[type="text"], select {
+            background: #1e2530;
+            border: 2px solid #2a3441;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #ffffff;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #00d4aa;
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+        }
+
+        .toggle-btn {
+            background: #364155;
+            border: none;
+            color: #ccd6f6;
+            padding: 8px 12px;
+            margin-left: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
             font-size: 0.9rem;
         }
-    }
 
-    .section-title {
-        color: #00d4aa;
-        font-size: 1.3rem;
-        font-weight: 600;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-</style>
+        .toggle-btn:hover {
+            background: #00d4aa;
+            color: #0a0f1c;
+        }
 
+        .toggle-btn.active {
+            background: #00d4aa;
+            color: #0a0f1c;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #00d4aa;
+        }
+
+        .results-section {
+            background: rgba(26, 31, 46, 0.8);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #2a3441;
+            backdrop-filter: blur(10px);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .result-card {
+            background: #1e2530;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #2a3441;
+        }
+
+        .result-card h3 {
+            color: #8892b0;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-card .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #00d4aa;
+        }
+
+        .profit {
+            color: #00d4aa;
+        }
+
+        .loss {
+            color: #ff6b6b;
+        }
+
+        .scenarios-table {
+            overflow-x: auto;
+            background: #1e2530;
+            border-radius: 12px;
+            border: 1px solid #2a3441;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #2a3441;
+        }
+
+        th {
+            background: #252c3a;
+            color: #ccd6f6;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            color: #ffffff;
+        }
+
+        .highlight {
+            background: rgba(0, 212, 170, 0.1);
+            border-left: 3px solid #00d4aa;
+        }
+
+        .config-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(30, 37, 48, 0.5);
+            border-radius: 12px;
+            border: 1px solid #2a3441;
+        }
+
+        .config-section h3 {
+            color: #ccd6f6;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .config-input {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            
+            .calculator-section, .results-section {
+                padding: 20px;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .section-title {
+            color: #00d4aa;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -276,242 +273,241 @@
             <p>Professional Order Analysis Tool</p>
         </div>
 
-    <div class="calculator-section">
-        <h2 class="section-title">Order Configuration</h2>
-        
-        <div class="config-section">
-            <h3>Scenario Percentages (comma-separated)</h3>
-            <input type="text" id="scenarioPercentages" class="config-input" value="0.5,1,1.5,2,2.5,3" placeholder="0.5,1,1.5,2,2.5,3">
-        </div>
-
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Entry Price <span class="required">*</span></label>
-                <input type="number" id="entryPrice" step="0.01" placeholder="Enter entry price">
+        <div class="calculator-section">
+            <h2 class="section-title">Order Configuration</h2>
+            
+            <div class="config-section">
+                <h3>Scenario Percentages (comma-separated)</h3>
+                <input type="text" id="scenarioPercentages" class="config-input" value="0.5,1,1.5,2,2.5,3" placeholder="0.5,1,1.5,2,2.5,3">
             </div>
 
-            <div class="form-group">
-                <label>Take Profit <span class="required">*</span></label>
-                <div class="input-wrapper">
-                    <input type="number" id="takeProfit" step="0.01" placeholder="Enter percentage or price">
-                    <button type="button" class="toggle-btn active" id="tpToggle">%</button>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Entry Price <span class="required">*</span></label>
+                    <input type="number" id="entryPrice" step="0.01" placeholder="Enter entry price">
+                </div>
+
+                <div class="form-group">
+                    <label>Take Profit <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <input type="number" id="takeProfit" step="0.01" placeholder="Enter percentage or price">
+                        <button type="button" class="toggle-btn active" id="tpToggle">%</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Risk:Reward Ratio</label>
+                    <input type="text" id="riskReward" value="1:3" placeholder="1:3">
+                </div>
+
+                <div class="form-group">
+                    <label>Entry Amount</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="entryAmount" step="0.01" placeholder="Enter amount">
+                        <button type="button" class="toggle-btn active" id="amountToggle">USD</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Risk:Reward Ratio</label>
-                <input type="text" id="riskReward" value="1:3" placeholder="1:3">
-            </div>
-
-            <div class="form-group">
-                <label>Entry Amount</label>
-                <div class="input-wrapper">
-                    <input type="number" id="entryAmount" step="0.01" placeholder="Enter amount">
-                    <button type="button" class="toggle-btn active" id="amountToggle">USD</button>
-                </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="roundShares" checked>
+                <label for="roundShares">Round down to whole shares</label>
             </div>
         </div>
 
-        <div class="checkbox-group">
-            <input type="checkbox" id="roundShares" checked>
-            <label for="roundShares">Round down to whole shares</label>
+        <div class="results-section">
+            <h2 class="section-title">Order Analysis</h2>
+            
+            <div class="results-grid" id="resultsGrid">
+                <!-- Results will be populated here -->
+            </div>
+
+            <div class="scenarios-table">
+                <table id="scenariosTable">
+                    <thead>
+                        <tr>
+                            <th>Take Profit %</th>
+                            <th>Take Profit Price</th>
+                            <th>Stop Loss Price</th>
+                            <th>Profit/Share</th>
+                            <th>Risk/Share</th>
+                            <th>Total Shares</th>
+                            <th>Total Profit</th>
+                            <th>Total Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Scenarios will be populated here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div class="results-section">
-        <h2 class="section-title">Order Analysis</h2>
-        
-        <div class="results-grid" id="resultsGrid">
-            <!-- Results will be populated here -->
-        </div>
+    <script>
+        let isProfitPercentage = true;
+        let isAmountUSD = true;
 
-        <div class="scenarios-table">
-            <table id="scenariosTable">
-                <thead>
-                    <tr>
-                        <th>Take Profit %</th>
-                        <th>Take Profit Price</th>
-                        <th>Stop Loss Price</th>
-                        <th>Profit/Share</th>
-                        <th>Risk/Share</th>
-                        <th>Total Shares</th>
-                        <th>Total Profit</th>
-                        <th>Total Risk</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Scenarios will be populated here -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script>
-    let isProfitPercentage = true;
-    let isAmountUSD = true;
-
-    // Toggle buttons
-    document.getElementById('tpToggle').addEventListener('click', function() {
-        isProfitPercentage = !isProfitPercentage;
-        this.textContent = isProfitPercentage ? '%' : '$';
-        this.classList.toggle('active');
-        document.getElementById('takeProfit').placeholder = isProfitPercentage ? 'Enter percentage' : 'Enter price';
-        calculate();
-    });
-
-    document.getElementById('amountToggle').addEventListener('click', function() {
-        isAmountUSD = !isAmountUSD;
-        this.textContent = isAmountUSD ? 'USD' : 'Shares';
-        this.classList.toggle('active');
-        document.getElementById('entryAmount').placeholder = isAmountUSD ? 'Enter USD amount' : 'Enter share count';
-        calculate();
-    });
-
-    // Add event listeners to all inputs
-    document.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', calculate);
-    });
-
-    function calculate() {
-        const entryPrice = parseFloat(document.getElementById('entryPrice').value) || 0;
-        const takeProfitInput = parseFloat(document.getElementById('takeProfit').value) || 0;
-        const riskRewardText = document.getElementById('riskReward').value || '1:3';
-        const entryAmount = parseFloat(document.getElementById('entryAmount').value) || 0;
-        const roundShares = document.getElementById('roundShares').checked;
-        const scenarioPercentages = document.getElementById('scenarioPercentages').value.split(',').map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
-
-        if (!entryPrice || !takeProfitInput) {
-            clearResults();
-            return;
-        }
-
-        // Parse risk:reward ratio
-        const rrParts = riskRewardText.split(':');
-        const risk = parseFloat(rrParts[0]) || 1;
-        const reward = parseFloat(rrParts[1]) || 3;
-        const rrRatio = reward / risk;
-
-        // Calculate take profit price
-        let takeProfitPrice;
-        if (isProfitPercentage) {
-            takeProfitPrice = entryPrice * (1 + takeProfitInput / 100);
-        } else {
-            takeProfitPrice = takeProfitInput;
-        }
-
-        // Calculate stop loss price using R:R ratio
-        const profitPerShare = takeProfitPrice - entryPrice;
-        const riskPerShare = profitPerShare / rrRatio;
-        const stopLossPrice = entryPrice - riskPerShare;
-
-        // Calculate shares and amounts
-        let totalShares = 0;
-        let totalProfit = 0;
-        let totalRisk = 0;
-
-        if (entryAmount > 0) {
-            if (isAmountUSD) {
-                totalShares = entryAmount / entryPrice;
-                if (roundShares) {
-                    totalShares = Math.floor(totalShares);
-                }
-            } else {
-                totalShares = entryAmount;
-                if (roundShares) {
-                    totalShares = Math.floor(totalShares);
-                }
-            }
-            totalProfit = totalShares * profitPerShare;
-            totalRisk = totalShares * riskPerShare;
-        }
-
-        // Update main results
-        updateMainResults(takeProfitPrice, stopLossPrice, profitPerShare, riskPerShare, totalShares, totalProfit, totalRisk);
-
-        // Update scenarios table
-        updateScenariosTable(entryPrice, scenarioPercentages, rrRatio, totalShares, takeProfitInput, roundShares);
-    }
-
-    function updateMainResults(takeProfitPrice, stopLossPrice, profitPerShare, riskPerShare, totalShares, totalProfit, totalRisk) {
-        const resultsGrid = document.getElementById('resultsGrid');
-        resultsGrid.innerHTML = `
-            <div class="result-card">
-                <h3>Take Profit Price</h3>
-                <div class="value profit">$${takeProfitPrice.toFixed(2)}</div>
-            </div>
-            <div class="result-card">
-                <h3>Stop Loss Price</h3>
-                <div class="value loss">$${stopLossPrice.toFixed(2)}</div>
-            </div>
-            <div class="result-card">
-                <h3>Profit per Share</h3>
-                <div class="value profit">$${profitPerShare.toFixed(2)}</div>
-            </div>
-            <div class="result-card">
-                <h3>Risk per Share</h3>
-                <div class="value loss">$${riskPerShare.toFixed(2)}</div>
-            </div>
-            ${totalShares > 0 ? `
-            <div class="result-card">
-                <h3>Total Shares</h3>
-                <div class="value">${totalShares.toFixed(0)}</div>
-            </div>
-            <div class="result-card">
-                <h3>Total Profit</h3>
-                <div class="value profit">$${totalProfit.toFixed(2)}</div>
-            </div>
-            <div class="result-card">
-                <h3>Total Risk</h3>
-                <div class="value loss">$${totalRisk.toFixed(2)}</div>
-            </div>` : ''}
-        `;
-    }
-
-    function updateScenariosTable(entryPrice, scenarioPercentages, rrRatio, totalShares, currentTPInput, roundShares) {
-        const tbody = document.querySelector('#scenariosTable tbody');
-        tbody.innerHTML = '';
-
-        scenarioPercentages.forEach(percentage => {
-            const tpPrice = entryPrice * (1 + percentage / 100);
-            const profitPerShare = tpPrice - entryPrice;
-            const riskPerShare = profitPerShare / rrRatio;
-            const slPrice = entryPrice - riskPerShare;
-            
-            let shares = totalShares;
-            let totalProfit = shares * profitPerShare;
-            let totalRisk = shares * riskPerShare;
-
-            const row = document.createElement('tr');
-            
-            // Check if this row should be highlighted
-            const shouldHighlight = isProfitPercentage && Math.abs(percentage - currentTPInput) < 0.01;
-            if (shouldHighlight) {
-                row.classList.add('highlight');
-            }
-
-            row.innerHTML = `
-                <td>${percentage.toFixed(1)}%</td>
-                <td>$${tpPrice.toFixed(2)}</td>
-                <td class="loss">$${slPrice.toFixed(2)}</td>
-                <td class="profit">$${profitPerShare.toFixed(2)}</td>
-                <td class="loss">$${riskPerShare.toFixed(2)}</td>
-                <td>${shares > 0 ? shares.toFixed(0) : '-'}</td>
-                <td class="profit">${totalProfit > 0 ? '$' + totalProfit.toFixed(2) : '-'}</td>
-                <td class="loss">${totalRisk > 0 ? '$' + totalRisk.toFixed(2) : '-'}</td>
-            `;
-            tbody.appendChild(row);
+        // Toggle buttons
+        document.getElementById('tpToggle').addEventListener('click', function() {
+            isProfitPercentage = !isProfitPercentage;
+            this.textContent = isProfitPercentage ? '%' : '$';
+            this.classList.toggle('active');
+            document.getElementById('takeProfit').placeholder = isProfitPercentage ? 'Enter percentage' : 'Enter price';
+            calculate();
         });
-    }
 
-    function clearResults() {
-        document.getElementById('resultsGrid').innerHTML = '';
-        document.querySelector('#scenariosTable tbody').innerHTML = '';
-    }
+        document.getElementById('amountToggle').addEventListener('click', function() {
+            isAmountUSD = !isAmountUSD;
+            this.textContent = isAmountUSD ? 'USD' : 'Shares';
+            this.classList.toggle('active');
+            document.getElementById('entryAmount').placeholder = isAmountUSD ? 'Enter USD amount' : 'Enter share count';
+            calculate();
+        });
 
-    // Initial calculation
-    calculate();
-</script>
+        // Add event listeners to all inputs
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', calculate);
+        });
 
+        function calculate() {
+            const entryPrice = parseFloat(document.getElementById('entryPrice').value) || 0;
+            const takeProfitInput = parseFloat(document.getElementById('takeProfit').value) || 0;
+            const riskRewardText = document.getElementById('riskReward').value || '1:3';
+            const entryAmount = parseFloat(document.getElementById('entryAmount').value) || 0;
+            const roundShares = document.getElementById('roundShares').checked;
+            const scenarioPercentages = document.getElementById('scenarioPercentages').value.split(',').map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
+
+            if (!entryPrice || !takeProfitInput) {
+                clearResults();
+                return;
+            }
+
+            // Parse risk:reward ratio
+            const rrParts = riskRewardText.split(':');
+            const risk = parseFloat(rrParts[0]) || 1;
+            const reward = parseFloat(rrParts[1]) || 3;
+            const rrRatio = reward / risk;
+
+            // Calculate take profit price
+            let takeProfitPrice;
+            if (isProfitPercentage) {
+                takeProfitPrice = entryPrice * (1 + takeProfitInput / 100);
+            } else {
+                takeProfitPrice = takeProfitInput;
+            }
+
+            // Calculate stop loss price using R:R ratio
+            const profitPerShare = takeProfitPrice - entryPrice;
+            const riskPerShare = profitPerShare / rrRatio;
+            const stopLossPrice = entryPrice - riskPerShare;
+
+            // Calculate shares and amounts
+            let totalShares = 0;
+            let totalProfit = 0;
+            let totalRisk = 0;
+
+            if (entryAmount > 0) {
+                if (isAmountUSD) {
+                    totalShares = entryAmount / entryPrice;
+                    if (roundShares) {
+                        totalShares = Math.floor(totalShares);
+                    }
+                } else {
+                    totalShares = entryAmount;
+                    if (roundShares) {
+                        totalShares = Math.floor(totalShares);
+                    }
+                }
+                totalProfit = totalShares * profitPerShare;
+                totalRisk = totalShares * riskPerShare;
+            }
+
+            // Update main results
+            updateMainResults(takeProfitPrice, stopLossPrice, profitPerShare, riskPerShare, totalShares, totalProfit, totalRisk);
+
+            // Update scenarios table
+            updateScenariosTable(entryPrice, scenarioPercentages, rrRatio, totalShares, takeProfitInput, roundShares);
+        }
+
+        function updateMainResults(takeProfitPrice, stopLossPrice, profitPerShare, riskPerShare, totalShares, totalProfit, totalRisk) {
+            const resultsGrid = document.getElementById('resultsGrid');
+            resultsGrid.innerHTML = `
+                <div class="result-card">
+                    <h3>Take Profit Price</h3>
+                    <div class="value profit">$${takeProfitPrice.toFixed(2)}</div>
+                </div>
+                <div class="result-card">
+                    <h3>Stop Loss Price</h3>
+                    <div class="value loss">$${stopLossPrice.toFixed(2)}</div>
+                </div>
+                <div class="result-card">
+                    <h3>Profit per Share</h3>
+                    <div class="value profit">$${profitPerShare.toFixed(2)}</div>
+                </div>
+                <div class="result-card">
+                    <h3>Risk per Share</h3>
+                    <div class="value loss">$${riskPerShare.toFixed(2)}</div>
+                </div>
+                ${totalShares > 0 ? `
+                <div class="result-card">
+                    <h3>Total Shares</h3>
+                    <div class="value">${totalShares.toFixed(0)}</div>
+                </div>
+                <div class="result-card">
+                    <h3>Total Profit</h3>
+                    <div class="value profit">$${totalProfit.toFixed(2)}</div>
+                </div>
+                <div class="result-card">
+                    <h3>Total Risk</h3>
+                    <div class="value loss">$${totalRisk.toFixed(2)}</div>
+                </div>` : ''}
+            `;
+        }
+
+        function updateScenariosTable(entryPrice, scenarioPercentages, rrRatio, totalShares, currentTPInput, roundShares) {
+            const tbody = document.querySelector('#scenariosTable tbody');
+            tbody.innerHTML = '';
+
+            scenarioPercentages.forEach(percentage => {
+                const tpPrice = entryPrice * (1 + percentage / 100);
+                const profitPerShare = tpPrice - entryPrice;
+                const riskPerShare = profitPerShare / rrRatio;
+                const slPrice = entryPrice - riskPerShare;
+                
+                let shares = totalShares;
+                let totalProfit = shares * profitPerShare;
+                let totalRisk = shares * riskPerShare;
+
+                const row = document.createElement('tr');
+                
+                // Check if this row should be highlighted
+                const shouldHighlight = isProfitPercentage && Math.abs(percentage - currentTPInput) < 0.01;
+                if (shouldHighlight) {
+                    row.classList.add('highlight');
+                }
+
+                row.innerHTML = `
+                    <td>${percentage.toFixed(1)}%</td>
+                    <td>$${tpPrice.toFixed(2)}</td>
+                    <td class="loss">$${slPrice.toFixed(2)}</td>
+                    <td class="profit">$${profitPerShare.toFixed(2)}</td>
+                    <td class="loss">$${riskPerShare.toFixed(2)}</td>
+                    <td>${shares > 0 ? shares.toFixed(0) : '-'}</td>
+                    <td class="profit">${totalProfit > 0 ? '$' + totalProfit.toFixed(2) : '-'}</td>
+                    <td class="loss">${totalRisk > 0 ? '$' + totalRisk.toFixed(2) : '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function clearResults() {
+            document.getElementById('resultsGrid').innerHTML = '';
+            document.querySelector('#scenariosTable tbody').innerHTML = '';
+        }
+
+        // Initial calculation
+        calculate();
+    </script>
 </body>
 </html>
